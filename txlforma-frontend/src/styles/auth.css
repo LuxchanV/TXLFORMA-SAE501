@@ -1,0 +1,89 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+.auth-page { display: flex; min-height: 100vh; font-family: "Poppins", sans-serif; overflow: hidden; background: #ffffff; }
+
+.auth-left {
+  width: 50%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 46px 28px;
+}
+
+.auth-logo { width: 150px; margin-bottom: 24px; }
+
+.auth-form { width: min(420px, 90%); display: grid; gap: 14px; }
+
+.auth-input {
+  background: #d9d9d9;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  gap: 12px;
+}
+
+.auth-ic { color: #0f172a; display: grid; place-items: center; }
+
+.auth-input input {
+  background: none;
+  border: none;
+  width: 100%;
+  font-size: 16px;
+  outline: none;
+  color: #0f172a;
+}
+
+.auth-eye {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #0f172a;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  border-radius: 10px;
+}
+.auth-eye:hover { background: rgba(0, 0, 0, 0.06); }
+
+.auth-submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  background: linear-gradient(90deg, #0d6efd, #003f91);
+  color: white;
+  font-size: 18px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.auth-submit:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(0, 64, 128, 0.35); }
+
+.auth-msg { margin: 4px 0 0; font-size: 14px; line-height: 1.4; }
+.auth-msg--err { color: #b91c1c; font-weight: 600; }
+
+.auth-bottom { margin-top: 18px; font-size: 14px; }
+.auth-bottom a { font-weight: 800; color: #0d0a45; text-decoration: underline; }
+
+.auth-right {
+  width: 50%;
+  background: linear-gradient(180deg, #007bff 0%, #0046a3 100%);
+  color: white;
+  padding: 80px 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.auth-right h1 { font-size: 54px; margin: 0 0 18px 0; font-weight: 800; }
+.auth-right p { width: min(520px, 90%); line-height: 1.8; font-size: 18px; opacity: 0.95; }
+
+@media (max-width: 900px) {
+  .auth-page { flex-direction: column; }
+  .auth-left, .auth-right { width: 100%; }
+  .auth-right { padding: 56px 22px; }
+}

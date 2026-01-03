@@ -1,0 +1,36 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Frontend
+node_modules/
+dist/
+.vite/
+.env
+.env.*
+
+# Backend
+target/
+*.log
+
+# Uploads (si générés)
+uploads/
+# --- Ne jamais push XAMPP / environnements locaux ---
+SAE501- xampp/
+xampp/
+
+# --- Frontend ---
+txlforma-frontend/node_modules/
+txlforma-frontend/dist/
+txlforma-frontend/.env
+txlforma-frontend/.env.*
+
+# --- Backend (Spring) ---
+txlforma-sae501-backend/target/
+txlforma-sae501-backend/.env
+txlforma-sae501-backend/.env.*
+
+# Logs
+*.log
