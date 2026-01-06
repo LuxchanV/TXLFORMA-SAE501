@@ -6,4 +6,6 @@ import com.txlforma.sae501backend.model.entity.Utilisateur;
 public interface UtilisateurService {
     Utilisateur register(RegisterRequestDto dto);
     Utilisateur getCurrentUserEntity();
+
+    void changeMyPassword(String oldPassword, String newPassword);
 }

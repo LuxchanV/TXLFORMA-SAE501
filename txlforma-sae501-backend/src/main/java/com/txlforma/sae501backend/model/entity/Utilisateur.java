@@ -55,13 +55,13 @@ public class Utilisateur {
     @Column(name = "date_creation", nullable = false, updatable = false)
     private LocalDateTime dateCreation;
 
-    @PrePersist
-    public void prePersist() {
-        if (dateCreation == null) dateCreation = LocalDateTime.now();
-    }
-    // ...
     @Builder.Default
     @Column(nullable = false)
     private Boolean actif = true;
 
+    @PrePersist
+    public void prePersist() {
+        if (dateCreation == null) dateCreation = LocalDateTime.now();
+        if (actif == null) actif = true;
+    }
 }

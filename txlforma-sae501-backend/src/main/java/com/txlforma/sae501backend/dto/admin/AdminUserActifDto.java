@@ -1,10 +1,10 @@
 package com.txlforma.sae501backend.dto.admin;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter @Setter
+@Data
 public class AdminUserActifDto {
-    @NotNull private Boolean actif;
+    @NotNull
+    private Boolean actif;
 }

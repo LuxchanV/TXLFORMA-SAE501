@@ -33,17 +33,26 @@ public class AdminUtilisateurController {
     }
 
     @PutMapping("/{id}")
-    public AdminUserResponseDto update(@PathVariable Long id, @Valid @RequestBody AdminUserUpdateDto dto) {
+    public AdminUserResponseDto update(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUserUpdateDto dto
+    ) {
         return service.update(id, dto);
     }
 
     @PatchMapping("/{id}/role")
-    public AdminUserResponseDto changerRole(@PathVariable Long id, @Valid @RequestBody AdminUserRoleDto dto) {
+    public AdminUserResponseDto changerRole(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUserRoleDto dto
+    ) {
         return service.changerRole(id, dto.getRole());
     }
 
     @PatchMapping("/{id}/actif")
-    public AdminUserResponseDto changerActif(@PathVariable Long id, @Valid @RequestBody AdminUserActifDto dto) {
+    public AdminUserResponseDto changerActif(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUserActifDto dto
+    ) {
         return service.changerActif(id, dto.getActif());
     }
 

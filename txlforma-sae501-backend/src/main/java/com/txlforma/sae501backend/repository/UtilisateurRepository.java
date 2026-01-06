@@ -16,16 +16,16 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     boolean existsByEmail(String email);
 
     @Query("""
-       select u from Utilisateur u
-       where (:role is null or u.role = :role)
-         and (:actif is null or u.actif = :actif)
-         and (
-            :q is null or :q = '' or
-            lower(u.nom) like lower(concat('%', :q, '%')) or
-            lower(u.prenom) like lower(concat('%', :q, '%')) or
-            lower(u.email) like lower(concat('%', :q, '%'))
-         )
-       order by u.dateCreation desc
+        select u from Utilisateur u
+        where (:role is null or u.role = :role)
+          and (:actif is null or u.actif = :actif)
+          and (
+             :q is null or :q = '' or
+             lower(u.nom) like lower(concat('%', :q, '%')) or
+             lower(u.prenom) like lower(concat('%', :q, '%')) or
+             lower(u.email) like lower(concat('%', :q, '%'))
+          )
+        order by u.dateCreation desc
     """)
     List<Utilisateur> searchAdmin(
             @Param("q") String q,

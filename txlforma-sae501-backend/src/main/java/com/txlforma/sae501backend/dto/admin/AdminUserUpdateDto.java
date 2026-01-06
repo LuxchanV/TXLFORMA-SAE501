@@ -2,14 +2,20 @@ package com.txlforma.sae501backend.dto.admin;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter @Setter
+@Data
 public class AdminUserUpdateDto {
-    @NotBlank private String nom;
-    @NotBlank private String prenom;
-    @Email @NotBlank private String email;
+
+    @NotBlank
+    private String nom;
+
+    @NotBlank
+    private String prenom;
+
+    @Email
+    @NotBlank
+    private String email;
 
     private String telephone;
     private String adressePostale;

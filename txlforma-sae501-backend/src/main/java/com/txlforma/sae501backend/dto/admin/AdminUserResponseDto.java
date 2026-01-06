@@ -10,13 +10,16 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class AdminUserResponseDto {
+
     private Long id;
     private String nom;
     private String prenom;
     private String email;
+
     private String telephone;
     private String adressePostale;
     private String entreprise;
+
     private Role role;
     private Boolean actif;
     private LocalDateTime dateCreation;

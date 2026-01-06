@@ -1,34 +1,31 @@
 package com.txlforma.sae501backend.service.impl;
 
-import com.txlforma.sae501backend.dto.admin.*;
-import com.txlforma.sae501backend.exception.ConflictException;
-import com.txlforma.sae501backend.exception.NotFoundException;
-import com.txlforma.sae501backend.model.entity.Intervenant;
+import com.txlforma.sae501backend.dto.admin.AdminUserResponseDto;
+import com.txlforma.sae501backend.dto.admin.AdminUserUpdateDto;
 import com.txlforma.sae501backend.model.entity.Utilisateur;
 import com.txlforma.sae501backend.model.enums.Role;
-import com.txlforma.sae501backend.repository.IntervenantRepository;
-import com.txlforma.sae501backend.repository.SessionFormationRepository;
 import com.txlforma.sae501backend.repository.UtilisateurRepository;
 import com.txlforma.sae501backend.service.AdminUtilisateurService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AdminUtilisateurServiceImpl implements AdminUtilisateurService {
 
-    private final UtilisateurRepository utilisateurRepo;
-    private final IntervenantRepository intervenantRepo;
-    private final SessionFormationRepository sessionRepo;
+    private final UtilisateurRepository utilisateurRepository;
 
     @Override
     @Transactional(readOnly = true)
     public List<AdminUserResponseDto> lister(String q, Role role, Boolean actif) {
-        return utilisateurRepo.searchAdmin(q, role, actif)
+        return utilisateurRepository.searchAdmin(q, role, actif)
                 .stream()
                 .map(AdminUserResponseDto::fromEntity)
                 .toList();
@@ -37,84 +34,67 @@ public class AdminUtilisateurServiceImpl implements AdminUtilisateurService {
     @Override
     @Transactional(readOnly = true)
     public AdminUserResponseDto get(Long id) {
-        Utilisateur u = utilisateurRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
+        Utilisateur u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
         return AdminUserResponseDto.fromEntity(u);
     }
 
     @Override
     public AdminUserResponseDto update(Long id, AdminUserUpdateDto dto) {
-        Utilisateur u = utilisateurRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
+        Utilisateur u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
 
-        // email unique si changement
-        if (!u.getEmail().equalsIgnoreCase(dto.getEmail()) && utilisateurRepo.existsByEmail(dto.getEmail())) {
-            throw new ConflictException("Email déjà utilisé");
+        String newEmail = dto.getEmail() == null ? null : dto.getEmail().trim();
+        if (newEmail == null || newEmail.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email invalide");
         }
 
-        u.setNom(dto.getNom());
-        u.setPrenom(dto.getPrenom());
-        u.setEmail(dto.getEmail());
+        if (!Objects.equals(u.getEmail(), newEmail) && utilisateurRepository.existsByEmail(newEmail)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email déjà utilisé");
+        }
+
+        u.setNom(dto.getNom().trim());
+        u.setPrenom(dto.getPrenom().trim());
+        u.setEmail(newEmail);
+
         u.setTelephone(dto.getTelephone());
         u.setAdressePostale(dto.getAdressePostale());
         u.setEntreprise(dto.getEntreprise());
 
-        return AdminUserResponseDto.fromEntity(utilisateurRepo.save(u));
+        return AdminUserResponseDto.fromEntity(u);
     }
 
     @Override
     public AdminUserResponseDto changerRole(Long id, Role role) {
-        Utilisateur u = utilisateurRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
-
-        Role old = u.getRole();
-
-        // Si on passe en FORMATEUR -> créer Intervenant si absent
-        if (role == Role.ROLE_FORMATEUR) {
-            if (old == Role.ROLE_ADMIN) {
-                throw new ConflictException("Un admin ne peut pas être formateur");
-            }
-            if (!intervenantRepo.existsByUtilisateur_Id(u.getId())) {
-                Intervenant itv = Intervenant.builder()
-                        .utilisateur(u)
-                        .specialite(null)
-                        .statut(null)
-                        .tauxHoraire(null)
-                        .build();
-                intervenantRepo.save(itv);
-            }
+        if (role == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role invalide");
         }
 
-        // Si on quitte FORMATEUR -> vérifier pas assigné à une session puis supprimer intervenant
-        if (old == Role.ROLE_FORMATEUR && role != Role.ROLE_FORMATEUR) {
-            var itvOpt = intervenantRepo.findByUtilisateur_Id(u.getId());
-            if (itvOpt.isPresent()) {
-                Long itvId = itvOpt.get().getId();
-                if (sessionRepo.existsByIntervenant_Id(itvId)) {
-                    throw new ConflictException("Impossible : ce formateur est assigné à une session");
-                }
-                intervenantRepo.deleteById(itvId);
-            }
-        }
+        Utilisateur u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
 
         u.setRole(role);
-        return AdminUserResponseDto.fromEntity(utilisateurRepo.save(u));
+        return AdminUserResponseDto.fromEntity(u);
     }
 
     @Override
     public AdminUserResponseDto changerActif(Long id, Boolean actif) {
-        Utilisateur u = utilisateurRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable"));
+        if (actif == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "actif invalide");
+        }
+
+        Utilisateur u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+
         u.setActif(actif);
-        return AdminUserResponseDto.fromEntity(utilisateurRepo.save(u));
+        return AdminUserResponseDto.fromEntity(u);
     }
 
     @Override
     public void supprimer(Long id) {
-        if (!utilisateurRepo.existsById(id)) throw new NotFoundException("Utilisateur introuvable");
-        // Simple : on désactive au lieu de delete hard (plus safe)
-        Utilisateur u = utilisateurRepo.findById(id).orElseThrow();
-        u.setActif(false);
-        utilisateurRepo.save(u);
+        Utilisateur u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+
+        utilisateurRepository.delete(u);
     }
 }

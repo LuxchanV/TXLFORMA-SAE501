@@ -45,4 +45,25 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Utilisateur courant introuvable"));
     }
+
+    @Override
+    public void changeMyPassword(String oldPassword, String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("Nouveau mot de passe invalide");
+        }
+        if (oldPassword == null || oldPassword.isBlank()) {
+            throw new IllegalArgumentException("Ancien mot de passe invalide");
+        }
+
+        Utilisateur u = getCurrentUserEntity();
+
+        // check ancien mdp
+        if (!passwordEncoder.matches(oldPassword, u.getMotDePasse())) {
+            throw new IllegalArgumentException("Ancien mot de passe incorrect");
+        }
+
+        // update
+        u.setMotDePasse(passwordEncoder.encode(newPassword));
+        utilisateurRepository.save(u);
+    }
 }
