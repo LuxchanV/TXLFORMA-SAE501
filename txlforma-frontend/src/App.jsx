@@ -1,3 +1,4 @@
+// src/App.jsx
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -9,6 +10,8 @@ import Register from "./pages/Register.jsx";
 import Catalogue from "./pages/Catalogue.jsx";
 import FormationDetails from "./pages/FormationDetails.jsx";
 
+import DomainPage from "./pages/formations/DomainePage.jsx";
+
 import FormateurHome from "./pages/formateur/FormateurHome.jsx";
 import AdminHome from "./pages/admin/AdminHome.jsx";
 
@@ -19,6 +22,9 @@ import UserFormationDetails from "./pages/user/UserFormationDetails.jsx";
 import UserSessions from "./pages/user/UserSessions.jsx";
 import UserPaiements from "./pages/user/UserPaiements.jsx";
 import UserEvaluations from "./pages/user/UserEvaluations.jsx";
+
+// ✅ NEW
+import UserCheckout from "./pages/user/UserCheckout.jsx";
 
 function DashboardRedirect() {
   const { user, loadingUser } = useAuth();
@@ -41,10 +47,7 @@ export default function App() {
 
   const isAuth = location.pathname === "/login" || location.pathname === "/register";
 
-  // ✅ Navbar uniquement sur pages publiques (pas login/register, pas dashboard)
   const showNavbar = !isDashboard && !isAuth;
-
-  // ✅ container seulement sur pages “contenu” (catalogue/details)
   const useContainer = !isDashboard && !isAuth && location.pathname !== "/";
 
   return (
@@ -54,8 +57,11 @@ export default function App() {
       <div className={useContainer ? "container" : ""}>
         <Routes>
           <Route path="/" element={<Home />} />
-
           <Route path="/catalogue" element={<Catalogue />} />
+
+          <Route path="/formations/front-end" element={<DomainPage domain="front-end" />} />
+          <Route path="/formations/back-end" element={<DomainPage domain="back-end" />} />
+          <Route path="/formations/cybersecurite" element={<DomainPage domain="cybersecurite" />} />
           <Route path="/formations/:id" element={<FormationDetails />} />
 
           <Route path="/login" element={<Login />} />
@@ -82,6 +88,10 @@ export default function App() {
             <Route path="catalogue" element={<UserCatalogue />} />
             <Route path="formations/:id" element={<UserFormationDetails />} />
             <Route path="sessions" element={<UserSessions />} />
+
+            {/* ✅ NEW */}
+            <Route path="paiement/:inscriptionId" element={<UserCheckout />} />
+
             <Route path="paiements" element={<UserPaiements />} />
             <Route path="evaluations" element={<UserEvaluations />} />
           </Route>

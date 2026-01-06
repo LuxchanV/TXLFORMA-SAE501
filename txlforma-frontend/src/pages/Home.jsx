@@ -1,236 +1,346 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../pages/home.css";
+import "./Home.css";
 
 export default function Home() {
   const navigate = useNavigate();
 
-  // Stats animation
-  const statsRef = useRef(null);
-
+  // ===== Reveal animations (pro, léger)
   useEffect(() => {
-    const stats = document.querySelectorAll(".stat-number");
-    let started = false;
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !started) {
-        started = true;
-
-        stats.forEach((stat) => {
-          const target = parseInt(stat.dataset.value, 10);
-          let count = 0;
-          const step = target / 80;
-
-          const timer = setInterval(() => {
-            count += step;
-            if (count >= target) {
-              clearInterval(timer);
-              stat.textContent = target + stat.dataset.suffix;
-            } else {
-              stat.textContent = Math.floor(count) + stat.dataset.suffix;
-            }
-          }, 20);
+    const els = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
         });
-      }
-    });
-
-    if (statsRef.current) observer.observe(statsRef.current);
-    return () => observer.disconnect();
+      },
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
-  // Slider formations
-  const formations = [
-    { id: 1, title: "Développement Front-End", text: "HTML, CSS, JavaScript, React.", icon: "💻" },
-    { id: 2, title: "Développement Back-End", text: "Spring Boot, API, MySQL.", icon: "🛠️" },
-    { id: 3, title: "Cybersécurité", text: "Réseau, attaques, protection.", icon: "🔐" },
-    { id: 4, title: "UX/UI Design", text: "Figma, personas, prototypage.", icon: "🎨" },
-  ];
+  // ===== Stats count animation
+  const statsRef = useRef(null);
+  useEffect(() => {
+    const container = statsRef.current;
+    if (!container) return;
 
-  const sliderRef = useRef(null);
-  const scrollNext = () => sliderRef.current?.scrollBy({ left: 330, behavior: "smooth" });
-  const scrollPrev = () => sliderRef.current?.scrollBy({ left: -330, behavior: "smooth" });
+    const stats = container.querySelectorAll("[data-count]");
+    let started = false;
 
-  // Slider avis
-  const testimonials = [
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting || started) return;
+        started = true;
+
+        stats.forEach((el) => {
+          const target = parseInt(el.dataset.count, 10);
+          const suffix = el.dataset.suffix || "";
+          let cur = 0;
+
+          const step = Math.max(1, Math.floor(target / 70));
+          const timer = setInterval(() => {
+            cur += step;
+            if (cur >= target) {
+              cur = target;
+              clearInterval(timer);
+            }
+            el.textContent = `${cur}${suffix}`;
+          }, 16);
+        });
+      },
+      { threshold: 0.35 }
+    );
+
+    io.observe(container);
+    return () => io.disconnect();
+  }, []);
+
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // ===== Carousel “Toutes les formations”
+  const formations = useMemo(
+    () => [
+      {
+        id: "front-end",
+        title: "Développement Front-End",
+        text:
+          "Créer des interfaces modernes, rapides et responsive. Design propre + composants réutilisables.",
+        btn: "Découvrir le Front-End",
+        route: "/formations/front-end",
+        icon: "💻",
+        tone: "tone-blue",
+      },
+      {
+        id: "back-end",
+        title: "Développement Back-End",
+        text:
+          "Construire des APIs sécurisées et scalables. Auth, base de données, architecture propre.",
+        btn: "Découvrir le Back-End",
+        route: "/formations/back-end",
+        icon: "🛠️",
+        tone: "tone-teal",
+      },
+      {
+        id: "cyber",
+        title: "Cybersécurité",
+        text:
+          "Comprendre les attaques et protéger tes systèmes. OWASP, audits, bonnes pratiques.",
+        btn: "Découvrir la Cybersécurité",
+        route: "/formations/cybersecurite",
+        icon: "🔐",
+        tone: "tone-cyan",
+      },
+    ],
+    []
+  );
+
+  const carRef = useRef(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const updateArrows = () => {
+    const el = carRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth - 2;
+    setCanLeft(el.scrollLeft > 2);
+    setCanRight(el.scrollLeft < max);
+  };
+
+  useEffect(() => {
+    const el = carRef.current;
+    if (!el) return;
+    updateArrows();
+
+    const onScroll = () => updateArrows();
+    const onResize = () => updateArrows();
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  const scrollByCard = (dir) => {
+    const el = carRef.current;
+    if (!el) return;
+    const card = el.querySelector(".formation-card");
+    const step = card ? card.getBoundingClientRect().width + 24 : 380;
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  };
+
+  // ===== Testimonials simple + propre
+  const avis = [
     {
       id: 1,
-      title: "Une plateforme vraiment incroyable",
-      author: "Sarah M.",
-      text: "Je me sens enfin à l’aise avec le numérique.",
-      image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      avatar: "https://randomuser.me/api/portraits/women/65.jpg",
-      views: "244 000",
+      title: "Les cours de front-end c’est incroyable",
+      author: "Lina",
+      text:
+        "Je progresse vite et les exercices sont bien expliqués. Ça donne envie d’aller au bout.",
+      img: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      views: "251,232",
+      stars: 5,
     },
     {
       id: 2,
-      title: "Je recommande de fou",
-      author: "Bilal",
-      text: "Les formateurs sont grave pédagogues.",
-      image: "https://images.pexels.com/photos/1181524/pexels-photo-1181524.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      avatar: "https://randomuser.me/api/portraits/men/71.jpg",
-      views: "203 587",
+      title: "La plateforme est claire et moderne",
+      author: "Lina",
+      text:
+        "Le parcours est structuré, et j’adore voir ma progression. Très motivant.",
+      img: "https://images.pexels.com/photos/1181524/pexels-photo-1181524.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      views: "251,232",
+      stars: 5,
     },
   ];
-
-  const testimonialsRef = useRef(null);
-  const nextTestimonials = () => testimonialsRef.current?.scrollBy({ left: 520, behavior: "smooth" });
-  const prevTestimonials = () => testimonialsRef.current?.scrollBy({ left: -520, behavior: "smooth" });
-
-  const scrollToFormations = () => {
-    document.getElementById("formations-section")?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <div className="home">
       {/* HERO */}
       <section className="hero">
-        <div className="hero-left">
-          <h1>
-            Découvrez nos<br />
-            <span>formations digitales</span>
-          </h1>
+        <div className="container hero__grid">
+          <div className="hero__left reveal">
+            <h1 className="hero__title">
+              Découvrez les différentes <span>formations</span>
+            </h1>
+            <p className="hero__subtitle">
+              Une plateforme moderne pour apprendre, pratiquer et valider ses compétences avec un parcours clair.
+            </p>
 
-          <p className="hero-text">
-            TXL FORMA est une plateforme moderne dédiée à l’apprentissage interactif.
-          </p>
+            <div className="hero__actions">
+              <button className="btn btn-primary" onClick={() => scrollTo("formations")}>
+                Découvrir les formations
+              </button>
+              <button className="btn btn-ghost" onClick={() => navigate("/register")}>
+                S’inscrire dès maintenant
+              </button>
+            </div>
 
-          <div className="hero-actions">
-            <button className="hero-btn" onClick={scrollToFormations}>
-              Commencer
-            </button>
-            <button className="hero-btn ghost" onClick={() => navigate("/catalogue")}>
-              Voir le catalogue
-            </button>
+            <div className="hero__mini">
+              <div className="mini-pill">
+                <span className="mini-dot" />
+                Modules structurés
+              </div>
+              <div className="mini-pill">
+                <span className="mini-dot" />
+                Progression suivie
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="hero-right">
-          <div className="hero-circle">
-            <img
-              src="/fillehome.png"
-              className="hero-image"
-              alt="Étudiante"
-              onError={(e) => {
-                e.currentTarget.src =
-                  "https://images.pexels.com/photos/3775146/pexels-photo-3775146.jpeg?auto=compress&cs=tinysrgb&w=900";
-              }}
-            />
+          <div className="hero__right reveal">
+            <div className="hero__imageWrap">
+              {/* Mets ton image dans /public/hero-student.png */}
+              <img
+                className="hero__img"
+                src="/etudiante.png"
+                alt="Étudiant"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+              <span className="hero__circle" aria-hidden="true" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* STATS */}
-      <section className="stats-section" ref={statsRef}>
-        <div className="stats-header">
-          <h2>Notre succès</h2>
-          <p>Une plateforme complète et efficace.</p>
-        </div>
+      <section className="stats reveal" ref={statsRef}>
+        <div className="container">
+          <h2 className="sectionTitle center">Notre Success</h2>
+          <p className="sectionDesc center">
+            Une plateforme pensée pour apprendre efficacement, avec une expérience fluide et claire.
+          </p>
 
-        <div className="stats-grid">
-          <div className="stat-box">
-            <span className="stat-number" data-value="15000" data-suffix="+">
-              0
-            </span>
-            <span className="stat-label">Étudiants</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-number" data-value="95" data-suffix="%">
-              0
-            </span>
-            <span className="stat-label">Satisfaction</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-number" data-value="35" data-suffix="">
-              0
-            </span>
-            <span className="stat-label">Formations</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-number" data-value="27" data-suffix="">
-              0
-            </span>
-            <span className="stat-label">Experts</span>
+          <div className="stats__grid">
+            <div className="stat">
+              <div className="stat__num" data-count="15000" data-suffix="+">0</div>
+              <div className="stat__label">Students</div>
+            </div>
+            <div className="stat">
+              <div className="stat__num" data-count="75" data-suffix="%">0</div>
+              <div className="stat__label">Total success</div>
+            </div>
+            <div className="stat">
+              <div className="stat__num" data-count="35">0</div>
+              <div className="stat__label">Main questions</div>
+            </div>
+            <div className="stat">
+              <div className="stat__num" data-count="26">0</div>
+              <div className="stat__label">Chief experts</div>
+            </div>
+            <div className="stat">
+              <div className="stat__num" data-count="16">0</div>
+              <div className="stat__label">Years of experience</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FORMATIONS */}
-      <section className="formations-section" id="formations-section">
-        <h2>
-          Toutes les formations <span className="txl-blue">TXL FORMA</span>
-        </h2>
-        <p className="formations-subtitle">
-          Sélection de compétences essentielles pour maîtriser le digital.
-        </p>
+      {/* FORMATIONS (Carousel) */}
+      <section className="formations" id="formations">
+        <div className="container reveal">
+          <h2 className="sectionTitle center">
+            Toutes les formations <span className="brand">TXLFORMA</span>.
+          </h2>
+          <p className="sectionDesc center">
+            Une sélection claire des domaines essentiels pour maîtriser le digital.
+          </p>
 
-        <button className="formations-arrow left" onClick={scrollPrev}>
-          ‹
-        </button>
-        <button className="formations-arrow right" onClick={scrollNext}>
-          ›
-        </button>
+          <div className="carousel">
+            <button
+              className={`arrow left ${!canLeft ? "disabled" : ""}`}
+              onClick={() => scrollByCard(-1)}
+              disabled={!canLeft}
+              aria-label="Précédent"
+            >
+              ‹
+            </button>
 
-        <div className="formations-slider" ref={sliderRef}>
-          {formations.map((f) => (
-            <div key={f.id} className="formation-card">
-              <div className="formation-icon">{f.icon}</div>
-              <h3>{f.title}</h3>
-              <p>{f.text}</p>
-
-              <button className="formation-btn" onClick={() => navigate("/catalogue")}>
-                Découvrir
-              </button>
+            <div className="carousel__track" ref={carRef}>
+              {formations.map((f) => (
+                <article key={f.id} className={`formation-card ${f.tone}`}>
+                  <div className="formation-icon">{f.icon}</div>
+                  <h3 className="formation-title">{f.title}</h3>
+                  <p className="formation-text">{f.text}</p>
+                  <button className="btn btn-card" onClick={() => navigate(f.route)}>
+                    {f.btn}
+                  </button>
+                </article>
+              ))}
             </div>
-          ))}
+
+            <button
+              className={`arrow right ${!canRight ? "disabled" : ""}`}
+              onClick={() => scrollByCard(1)}
+              disabled={!canRight}
+              aria-label="Suivant"
+            >
+              ›
+            </button>
+          </div>
         </div>
       </section>
 
       {/* AVIS */}
-      <section className="testimonials-section" id="about-section">
-        <h2 className="testimonials-title">Ils nous font confiance</h2>
+      <section className="avis">
+        <div className="container reveal">
+          <div className="avis__top">
+            <h2 className="sectionTitle">Ils nous font <span className="brandDark">confiance</span></h2>
+            <button className="linkBtn" onClick={() => scrollTo("formations")}>See all</button>
+          </div>
 
-        <button className="testimonials-arrow left" onClick={prevTestimonials}>
-          ‹
-        </button>
-        <button className="testimonials-arrow right" onClick={nextTestimonials}>
-          ›
-        </button>
+          <div className="avis__grid">
+            {avis.map((a) => (
+              <article className="avisCard" key={a.id}>
+                <div className="avisImg">
+                  <img src={a.img} alt={a.title} />
+                </div>
 
-        <div className="testimonials-slider" ref={testimonialsRef}>
-          {testimonials.map((t) => (
-            <div key={t.id} className="testimonial-card">
-              <div className="testimonial-image-wrapper">
-                <img src={t.image} className="testimonial-image" alt={t.author} />
-              </div>
+                <h3 className="avisTitle">{a.title}</h3>
 
-              <h3 className="testimonial-title">{t.title}</h3>
+                <div className="avisMeta">
+                  <div className="avatar">{a.author[0]}</div>
+                  <div>
+                    <div className="avisAuthor">{a.author}</div>
+                    <div className="avisSmall">Class, launched less than a year ago…</div>
+                  </div>
+                </div>
 
-              <div className="testimonial-author">
-                <img src={t.avatar} className="testimonial-avatar" alt={t.author} />
-                <span>{t.author}</span>
-              </div>
-
-              <p className="testimonial-text">{t.text}</p>
-
-              <div className="testimonial-footer">
-                <span className="stars">★★★★★</span>
-                <span className="views">{t.views} vues</span>
-              </div>
-            </div>
-          ))}
+                <div className="avisBottom">
+                  <button className="linkBtn small">Read more</button>
+                  <div className="stars">★★★★★</div>
+                  <div className="views">👁 {a.views}</div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CONTACT */}
-      <section className="contact-section" id="contact-section">
-        <h2>Contact</h2>
-        <p>Besoin d’aide ? Notre équipe te répond rapidement.</p>
-        <button className="contact-btn" onClick={() => navigate("/register")}>
-          Nous contacter
-        </button>
-      </section>
+      {/* FOOTER */}
+      <footer className="footer">
+        <div className="container footer__grid">
+          <div className="footer__brand">
+            <div className="footer__logo">TXL FORMA</div>
+            <div className="footer__sub">Gestion formation numérique</div>
+          </div>
 
-      <footer className="footer">© 2025 TXL FORMA — Tous droits réservés</footer>
+          <div className="footer__links">
+            <a href="#">Careers</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & Conditions</a>
+          </div>
+
+          <div className="footer__copy">© 2025 TXLFORMA Class Technologies Inc.</div>
+        </div>
+      </footer>
     </div>
   );
 }

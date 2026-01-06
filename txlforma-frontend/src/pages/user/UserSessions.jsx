@@ -1,4 +1,6 @@
+// src/pages/user/UserSessions.jsx
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { mesInscriptions } from "../../services/inscriptions";
 
 function parseISO(dateStr) {
@@ -8,6 +10,8 @@ function parseISO(dateStr) {
 }
 
 export default function UserSessions() {
+  const nav = useNavigate();
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,21 +61,41 @@ export default function UserSessions() {
         <div style={{ color: "#64748b", fontWeight: 700 }}>Aucune session.</div>
       ) : (
         <div className="u-list">
-          {list.map((ins) => (
-            <div key={ins.id} className="u-item">
-              <div className="u-item__top">
-                <div>
-                  <div className="u-item__name">{ins.formationTitre ?? "—"}</div>
-                  <div className="u-item__meta">
-                    {ins.dateDebut} → {ins.dateFin} • {ins.salle || "Salle ?"} • Inscription #{ins.id}
+          {list.map((ins) => {
+            const statut = ins.statut ?? "—";
+            const isPayee = statut === "PAYEE";
+            const isAnnulee = statut === "ANNULEE";
+            const canPay = !isPayee && !isAnnulee;
+
+            return (
+              <div key={ins.id} className="u-item">
+                <div className="u-item__top">
+                  <div>
+                    <div className="u-item__name">{ins.formationTitre ?? "—"}</div>
+                    <div className="u-item__meta">
+                      {ins.dateDebut} → {ins.dateFin} • {ins.salle || "Salle ?"} • Inscription #{ins.id}
+                      {typeof ins.formationPrix === "number" ? ` • Prix: ${ins.formationPrix}€` : ""}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <span className={`u-chip ${isPayee ? "u-chip--ok" : "u-chip--wait"}`}>
+                      {statut}
+                    </span>
+
+                    {canPay ? (
+                      <button
+                        className="u-btn u-btn--primary"
+                        onClick={() => nav(`/user/paiement/${ins.id}`)}
+                      >
+                        Payer
+                      </button>
+                    ) : null}
                   </div>
                 </div>
-                <span className={`u-chip ${ins.statut === "PAYEE" ? "u-chip--ok" : "u-chip--wait"}`}>
-                  {ins.statut ?? "—"}
-                </span>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import "../styles/public-navbar.css";
 
@@ -7,22 +7,29 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
   const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
   const goHomeAndScroll = (id) => {
+    const doScroll = () =>
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+
     if (location.pathname !== "/") {
-      navigate("/", { replace: false });
-      setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-      }, 120);
+      navigate("/");
+      setTimeout(doScroll, 160);
     } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      doScroll();
     }
   };
 
@@ -31,48 +38,63 @@ export default function Navbar() {
     navigate("/", { replace: true });
   };
 
-  const cataloguePath = user?.role === "ROLE_USER" ? "/user/catalogue" : "/catalogue";
-
   return (
-    <header className={`p-navbar ${scrolled ? "p-navbar--scrolled" : ""}`}>
-      <div className="p-navbar__inner">
-        <div className="p-brand" onClick={() => navigate("/")}>
-          {/* Logo optionnel si tu l’as dans public/logonoir.png */}
+    <header className={`txl-nav ${scrolled ? "txl-nav--scrolled" : ""}`}>
+      <div className="txl-nav__inner">
+        {/* LEFT: BRAND */}
+        <div className="txl-brand" onClick={() => navigate("/")}>
+          {/* Mets ton logo dans /public/logo.png */}
           <img
-            className="p-brand__logo"
-            src="/logonoir.png"
+            src="/logo.png"
+            className="txl-brand__logo"
             alt="TXL FORMA"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
-          <span className="p-brand__txt">TXL FORMA</span>
+          <span className="txl-brand__name">TXL FORMA</span>
         </div>
 
-        <nav className="p-nav">
-          <button onClick={() => goHomeAndScroll("formations-section")}>Formations</button>
-          <button onClick={() => goHomeAndScroll("contact-section")}>Contact</button>
-          <button onClick={() => goHomeAndScroll("about-section")}>À propos</button>
-          <NavLink to={cataloguePath}>Catalogue</NavLink>
+        {/* MOBILE BURGER */}
+        <button
+          className="txl-burger"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Menu"
+          aria-expanded={open}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        {/* CENTER LINKS (✅ pas de Catalogue) */}
+        <nav className={`txl-links ${open ? "txl-links--open" : ""}`}>
+          <button className="txl-link" onClick={() => goHomeAndScroll("contact-section")}>
+            Contact
+          </button>
+          <button className="txl-link" onClick={() => goHomeAndScroll("about-section")}>
+            À propos
+          </button>
         </nav>
 
-        <div className="p-actions">
+        {/* RIGHT: ACTIONS */}
+        <div className="txl-actions">
           {!user ? (
             <>
-              <button className="p-btn p-btn--ghost" onClick={() => navigate("/login")}>
+              <button className="txl-btn txl-btn--ghost" onClick={() => navigate("/login")}>
                 Login
               </button>
-              <button className="p-btn" onClick={() => navigate("/register")}>
+              <button className="txl-btn txl-btn--primary" onClick={() => navigate("/register")}>
                 Sign Up
               </button>
             </>
           ) : (
             <>
-              <span className="p-chip">
+              <span className="txl-chip">
                 {user.prenom} — {user.role}
               </span>
-              <button className="p-btn p-btn--ghost" onClick={() => navigate("/dashboard")}>
+              <button className="txl-btn txl-btn--ghost" onClick={() => navigate("/dashboard")}>
                 Dashboard
               </button>
-              <button className="p-btn p-btn--danger" onClick={onLogout}>
+              <button className="txl-btn txl-btn--danger" onClick={onLogout}>
                 Logout
               </button>
             </>

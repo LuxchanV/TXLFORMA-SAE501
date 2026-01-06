@@ -1,3 +1,4 @@
+// src/pages/user/UserPaiements.jsx
 import { useEffect, useState } from "react";
 import { mesInscriptions } from "../../services/inscriptions";
 import { paiementsParInscription } from "../../services/paiements";
@@ -31,6 +32,14 @@ export default function UserPaiements() {
           // ignore
         }
       }
+
+      // tri: plus récent d'abord (si datePaiement dispo)
+      all.sort((a, b) => {
+        const da = a.paiement?.datePaiement ? new Date(a.paiement.datePaiement).getTime() : 0;
+        const db = b.paiement?.datePaiement ? new Date(b.paiement.datePaiement).getTime() : 0;
+        return db - da;
+      });
+
       setRows(all);
     } catch {
       setError("Impossible de charger l’historique des paiements.");
@@ -63,7 +72,15 @@ export default function UserPaiements() {
         <div className="u-list">
           {rows.map((r) => {
             const p = r.paiement;
-            const ok = (p?.statut ?? "").toUpperCase().includes("SUCC");
+            const st = (p?.statut || "").toUpperCase();
+
+            const ok = st === "SUCCES";
+            const fail = st === "ECHEC";
+            const wait = st === "EN_ATTENTE" || (!ok && !fail);
+
+            const chipClass = ok ? "u-chip--ok" : fail ? "u-chip--bad" : "u-chip--wait";
+            const chipLabel = ok ? "Validée" : fail ? "Échec" : "En attente";
+
             return (
               <div key={`${r.inscriptionId}-${p.id}`} className="u-item">
                 <div className="u-item__top">
@@ -71,14 +88,13 @@ export default function UserPaiements() {
                     <div className="u-item__name">{r.formationTitre}</div>
                     <div className="u-item__meta">
                       Inscription #{r.inscriptionId} • Paiement #{p.id} • {p.modePaiement} • {p.statut}
+                      {p.datePaiement ? ` • ${String(p.datePaiement).replace("T", " ").slice(0, 19)}` : ""}
                     </div>
                   </div>
 
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <div style={{ fontWeight: 900, fontSize: 18 }}>{p.montant}€</div>
-                    <span className={`u-chip ${ok ? "u-chip--ok" : "u-chip--wait"}`}>
-                      {ok ? "Validée" : "En cours"}
-                    </span>
+                    <span className={`u-chip ${chipClass}`}>{chipLabel}</span>
                   </div>
                 </div>
               </div>

@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { annulerInscription, mesInscriptions } from "../../services/inscriptions";
-import { simulerPaiement, paiementsParInscription } from "../../services/paiements";
+import { creerCheckout, paiementsParInscription } from "../../services/paiements";
 import { telechargerAttestation } from "../../services/attestations";
+import PaymentModal from "../../components/PaymentModal.jsx";
 
 export default function UserInscriptions() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
+
   const [payingId, setPayingId] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
+
   const [paymentsMap, setPaymentsMap] = useState({});
+
+  // ✅ NEW : modal paiement CB
+  const [payOpen, setPayOpen] = useState(false);
+  const [checkout, setCheckout] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -54,12 +61,13 @@ export default function UserInscriptions() {
   const onAnnuler = async (id, statut) => {
     setMsg("");
     setError("");
+
     try {
-      // logique métier: on bloque côté UI si PAYEE
       if (statut === "PAYEE") {
         setError("Inscription déjà payée : annulation bloquée.");
         return;
       }
+
       await annulerInscription(id);
       setMsg("✅ Inscription annulée");
       await load();
@@ -68,6 +76,7 @@ export default function UserInscriptions() {
     }
   };
 
+  // ✅ NEW : au clic “Payer” => on crée un checkout EN_ATTENTE puis on ouvre le modal carte
   const onPayer = async (id, statut) => {
     setMsg("");
     setError("");
@@ -83,11 +92,13 @@ export default function UserInscriptions() {
         return;
       }
 
-      const paiement = await simulerPaiement(id);
-      setMsg(`✅ Paiement OK (montant: ${paiement?.montant ?? "?"}€)`);
-      await load();
+      // 🔥 crée le paiement EN_ATTENTE côté back et récupère paiementId + montant + titre
+      const co = await creerCheckout(id);
+
+      setCheckout(co);
+      setPayOpen(true);
     } catch (e) {
-      setError(e?.response?.data?.message || "Erreur paiement");
+      setError(e?.response?.data?.message || "Erreur paiement (checkout)");
     } finally {
       setPayingId(null);
     }
@@ -127,6 +138,20 @@ export default function UserInscriptions() {
 
   return (
     <div className="card">
+      {/* ✅ MODAL CB (test) */}
+      <PaymentModal
+        open={payOpen}
+        checkout={checkout}
+        onClose={() => {
+          setPayOpen(false);
+          setCheckout(null);
+        }}
+        onPaid={async () => {
+          setMsg("✅ Paiement validé !");
+          await load();
+        }}
+      />
+
       <h1>Mes inscriptions</h1>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
