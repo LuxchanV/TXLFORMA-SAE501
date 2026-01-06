@@ -7,5 +7,6 @@ public interface UtilisateurService {
     Utilisateur register(RegisterRequestDto dto);
     Utilisateur getCurrentUserEntity();
 
+    // ✅ changer le mdp du user connecté
     void changeMyPassword(String oldPassword, String newPassword);
 }

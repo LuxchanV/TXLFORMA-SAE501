@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 
 import AdminLayout from "./AdminLayout.jsx";
+import AdminUsersTab from "./AdminUsersTab.jsx";
 
 import {
   adminStatsOverview,
@@ -122,6 +123,8 @@ export default function AdminHome() {
       { id: "intervenants", label: "Formateurs" },
       { id: "inscriptions", label: "Inscriptions" },
       { id: "paiements", label: "Paiements" },
+      { id: "comptes", label: "Comptes" },
+
     ],
     []
   );
@@ -1583,6 +1586,11 @@ export default function AdminHome() {
           </>
         )}
       </div>
+              {/* COMPTES */}
+        {tab === "comptes" && (
+          <AdminUsersTab />
+        )}
+
     </AdminLayout>
   );
 }

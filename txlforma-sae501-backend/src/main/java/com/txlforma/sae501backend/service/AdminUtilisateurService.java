@@ -12,4 +12,7 @@ public interface AdminUtilisateurService {
     AdminUserResponseDto changerRole(Long id, Role role);
     AdminUserResponseDto changerActif(Long id, Boolean actif);
     void supprimer(Long id);
+
+    // ✅ création d'un utilisateur par l'admin (USER / FORMATEUR / ADMIN)
+    AdminCreateUserResponseDto creer(AdminCreateUserRequestDto dto);
 }

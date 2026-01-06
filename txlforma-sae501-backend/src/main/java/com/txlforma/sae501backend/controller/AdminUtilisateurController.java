@@ -17,7 +17,11 @@ public class AdminUtilisateurController {
 
     private final AdminUtilisateurService service;
 
-    // /api/admin/utilisateurs?q=dupont&role=ROLE_USER&actif=true
+    @PostMapping
+    public AdminCreateUserResponseDto creer(@Valid @RequestBody AdminCreateUserRequestDto dto) {
+        return service.creer(dto);
+    }
+
     @GetMapping
     public List<AdminUserResponseDto> lister(
             @RequestParam(required = false) String q,
@@ -33,27 +37,18 @@ public class AdminUtilisateurController {
     }
 
     @PutMapping("/{id}")
-    public AdminUserResponseDto update(
-            @PathVariable Long id,
-            @Valid @RequestBody AdminUserUpdateDto dto
-    ) {
+    public AdminUserResponseDto update(@PathVariable Long id, @Valid @RequestBody AdminUserUpdateDto dto) {
         return service.update(id, dto);
     }
 
     @PatchMapping("/{id}/role")
-    public AdminUserResponseDto changerRole(
-            @PathVariable Long id,
-            @Valid @RequestBody AdminUserRoleDto dto
-    ) {
-        return service.changerRole(id, dto.getRole());
+    public AdminUserResponseDto changerRole(@PathVariable Long id, @Valid @RequestBody AdminUserRoleDto dto) {
+        return service.changerRole(id, dto.role());
     }
 
     @PatchMapping("/{id}/actif")
-    public AdminUserResponseDto changerActif(
-            @PathVariable Long id,
-            @Valid @RequestBody AdminUserActifDto dto
-    ) {
-        return service.changerActif(id, dto.getActif());
+    public AdminUserResponseDto changerActif(@PathVariable Long id, @Valid @RequestBody AdminUserActifDto dto) {
+        return service.changerActif(id, dto.actif());
     }
 
     @DeleteMapping("/{id}")

@@ -73,7 +73,6 @@ export async function adminDeleteFormation(id) {
 
 // -------------------------
 // SESSIONS
-// ✅ FIX : formationId / intervenantId DANS LE BODY
 // -------------------------
 export async function adminSessions(params = {}) {
   const { data } = await http.get("/api/admin/sessions", { params });
@@ -87,16 +86,13 @@ export async function adminCreateSession(payload) {
       payload.intervenantId === "" || payload.intervenantId == null
         ? null
         : Number(payload.intervenantId),
-
     dateDebut: payload.dateDebut,
     dateFin: payload.dateFin,
     salle: payload.salle?.trim() || null,
-
     nbPlacesMax:
       payload.nbPlacesMax === "" || payload.nbPlacesMax == null
         ? null
         : Number(payload.nbPlacesMax),
-
     statut: payload.statut || "OUVERTE",
   };
 
@@ -110,21 +106,17 @@ export async function adminUpdateSession(id, payload) {
       payload.formationId === "" || payload.formationId == null
         ? null
         : Number(payload.formationId),
-
     intervenantId:
       payload.intervenantId === "" || payload.intervenantId == null
         ? null
         : Number(payload.intervenantId),
-
     dateDebut: payload.dateDebut ?? null,
     dateFin: payload.dateFin ?? null,
     salle: payload.salle?.trim() || null,
-
     nbPlacesMax:
       payload.nbPlacesMax === "" || payload.nbPlacesMax == null
         ? null
         : Number(payload.nbPlacesMax),
-
     statut: payload.statut ?? null,
   };
 
@@ -137,7 +129,7 @@ export async function adminDeleteSession(id) {
 }
 
 // -------------------------
-// INTERVENANTS (ADMIN)
+// INTERVENANTS
 // -------------------------
 export async function adminIntervenants() {
   const { data } = await http.get("/api/admin/intervenants");
@@ -168,7 +160,7 @@ export async function adminDeleteIntervenant(id) {
 }
 
 // -------------------------
-// INSCRIPTIONS (ADMIN)
+// INSCRIPTIONS
 // -------------------------
 export async function adminInscriptions(params = {}) {
   const { data } = await http.get("/api/admin/inscriptions", { params });
@@ -181,29 +173,22 @@ export async function adminGetInscription(id) {
 }
 
 export async function adminUpdateInscriptionStatut(id, statut) {
-  const { data } = await http.patch(
-    `/api/admin/inscriptions/${id}/statut`,
-    { statut }
-  );
+  const { data } = await http.patch(`/api/admin/inscriptions/${id}/statut`, { statut });
   return data;
 }
 
 export async function adminMarquerInscriptionPayee(id) {
-  const { data } = await http.post(
-    `/api/admin/inscriptions/${id}/marquer-payee`
-  );
+  const { data } = await http.post(`/api/admin/inscriptions/${id}/marquer-payee`);
   return data;
 }
 
 export async function adminRefuserInscription(id) {
-  const { data } = await http.post(
-    `/api/admin/inscriptions/${id}/refuser`
-  );
+  const { data } = await http.post(`/api/admin/inscriptions/${id}/refuser`);
   return data;
 }
 
 // -------------------------
-// PAIEMENTS (ADMIN)
+// PAIEMENTS
 // -------------------------
 export async function adminPaiements(params = {}) {
   const { data } = await http.get("/api/admin/paiements", { params });
@@ -231,9 +216,38 @@ export async function adminCreatePaiement(payload) {
 }
 
 export async function adminUpdatePaiementStatut(id, statut) {
-  const { data } = await http.patch(
-    `/api/admin/paiements/${id}/statut`,
-    { statut }
-  );
+  const { data } = await http.patch(`/api/admin/paiements/${id}/statut`, { statut });
   return data;
+}
+
+// -------------------------
+// UTILISATEURS (ADMIN)
+// -------------------------
+export async function adminUsers(params = {}) {
+  const { data } = await http.get("/api/admin/utilisateurs", { params });
+  return data;
+}
+
+export async function adminCreateUser(payload) {
+  const { data } = await http.post("/api/admin/utilisateurs", payload);
+  return data;
+}
+
+export async function adminUpdateUser(id, payload) {
+  const { data } = await http.put(`/api/admin/utilisateurs/${id}`, payload);
+  return data;
+}
+
+export async function adminChangeUserRole(id, role) {
+  const { data } = await http.patch(`/api/admin/utilisateurs/${id}/role`, { role });
+  return data;
+}
+
+export async function adminChangeUserActif(id, actif) {
+  const { data } = await http.patch(`/api/admin/utilisateurs/${id}/actif`, { actif });
+  return data;
+}
+
+export async function adminDeleteUser(id) {
+  await http.delete(`/api/admin/utilisateurs/${id}`);
 }

@@ -31,7 +31,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI());
     }
 
-    // ✅ Maintenant tu verras: "formationId: ne doit pas être nul"
+    // ✅ 400 propre quand on throw IllegalArgumentException
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> badRequest(IllegalArgumentException ex, HttpServletRequest req) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> validation(MethodArgumentNotValidException ex, HttpServletRequest req) {
         String msg = ex.getBindingResult().getFieldErrors().stream()
@@ -40,7 +45,6 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, msg, req.getRequestURI());
     }
 
-    // ✅ Si enum invalide dans query param (ex: statut=AAAA)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> typeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
         String param = ex.getName();
@@ -48,7 +52,6 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, param + ": valeur invalide (" + value + ")", req.getRequestURI());
     }
 
-    // ✅ JSON cassé / date pas parseable, etc.
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> jsonError(HttpMessageNotReadableException ex, HttpServletRequest req) {
         return build(HttpStatus.BAD_REQUEST, "Requête JSON invalide", req.getRequestURI());

@@ -59,9 +59,15 @@ public class Utilisateur {
     @Column(nullable = false)
     private Boolean actif = true;
 
+    // ✅ force changement mdp au 1er login (surtout pour comptes créés par admin)
+    @Builder.Default
+    @Column(name = "must_change_password", nullable = false)
+    private Boolean mustChangePassword = false;
+
     @PrePersist
     public void prePersist() {
         if (dateCreation == null) dateCreation = LocalDateTime.now();
         if (actif == null) actif = true;
+        if (mustChangePassword == null) mustChangePassword = false;
     }
 }

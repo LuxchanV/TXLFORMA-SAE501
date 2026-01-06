@@ -3,8 +3,9 @@ import axios from "axios";
 const TOKEN_KEY = "token";
 
 const http = axios.create({
-  // en dev: on reste sur le même domaine (vite) + proxy
-  baseURL: "",
+  // ✅ Dev: vide => proxy Vite possible
+  // ✅ Prod (Vercel): mettre VITE_API_URL dans les variables d’environnement
+  baseURL: import.meta.env.VITE_API_URL ?? "",
   timeout: 20000,
 });
 
