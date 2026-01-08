@@ -25,21 +25,19 @@ public class Paiement {
     @Column(nullable = false)
     private Double montant;
 
-    // ✅ Builder.Default
+    // Pour ton projet, on garde ce champ comme "date de création / action paiement"
     @Builder.Default
     @Column(nullable = false)
     private LocalDateTime datePaiement = LocalDateTime.now();
 
-    // ✅ Builder.Default
     @Builder.Default
     @Column(nullable = false, length = 50)
-    private String modePaiement = "SIMULATION";
+    private String modePaiement = "CARTE_TEST";
 
-    // ✅ Builder.Default
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private StatutPaiement statut = StatutPaiement.SUCCES;
+    private StatutPaiement statut = StatutPaiement.EN_ATTENTE;
 
     @Column(length = 255)
     private String referenceExterne;

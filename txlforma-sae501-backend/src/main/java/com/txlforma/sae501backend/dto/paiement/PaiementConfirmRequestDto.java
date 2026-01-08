@@ -4,12 +4,9 @@ import lombok.Data;
 
 @Data
 public class PaiementConfirmRequestDto {
-
-    // "auto" (déduit via numéro), "success", "fail"
-    private String simulate;
-
-    private String cardNumber; // ex: 4242 4242 4242 4242
-    private Integer expMonth;  // ex: 12
-    private Integer expYear;   // ex: 2030
-    private String cvc;        // ex: 123
+    private String simulate;  // auto | success | fail
+    private String cardNumber;
+    private Integer expMonth;
+    private Integer expYear;
+    private String cvc;
 }

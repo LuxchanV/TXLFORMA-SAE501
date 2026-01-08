@@ -2,7 +2,9 @@ package com.txlforma.sae501backend.repository;
 
 import com.txlforma.sae501backend.model.entity.Paiement;
 import com.txlforma.sae501backend.model.enums.StatutPaiement;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,6 +22,35 @@ public interface PaiementRepository extends JpaRepository<Paiement, Long> {
 
     List<Paiement> findByInscription_Id(Long inscriptionId);
 
+    // ✅ Dernier paiement EN_ATTENTE pour une inscription
+    Optional<Paiement> findFirstByInscription_IdAndStatutOrderByDatePaiementDesc(Long inscriptionId, StatutPaiement statut);
+
+    // ✅ Tous les paiements EN_ATTENTE (nettoyage doublons)
+    List<Paiement> findByInscription_IdAndStatut(Long inscriptionId, StatutPaiement statut);
+
+    // ✅ Lock pessimiste sur un paiement (anti double-confirm concurrent)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select p from Paiement p
+        join fetch p.inscription i
+        join fetch i.session s
+        join fetch s.formation f
+        where p.id = :id
+    """)
+    Optional<Paiement> findByIdForUpdate(@Param("id") Long id);
+
+    // ✅ Trouver un paiement via PaymentIntent Stripe (avec lock)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select p from Paiement p
+        join fetch p.inscription i
+        join fetch i.session s
+        join fetch s.formation f
+        where p.referenceExterne = :ref
+    """)
+    Optional<Paiement> findByReferenceExterneForUpdate(@Param("ref") String referenceExterne);
+
+    // (tes queries admin inchangées)
     @Query("""
         select distinct p from Paiement p
         join fetch p.inscription i

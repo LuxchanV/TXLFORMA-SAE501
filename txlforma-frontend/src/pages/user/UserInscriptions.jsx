@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { annulerInscription, mesInscriptions } from "../../services/inscriptions";
-import { creerCheckout, paiementsParInscription } from "../../services/paiements";
+import { paiementsParInscription } from "../../services/paiements";
 import { telechargerAttestation } from "../../services/attestations";
-import PaymentModal from "../../components/PaymentModal.jsx";
 
 export default function UserInscriptions() {
+  const nav = useNavigate();
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
@@ -15,10 +16,6 @@ export default function UserInscriptions() {
   const [downloadingId, setDownloadingId] = useState(null);
 
   const [paymentsMap, setPaymentsMap] = useState({});
-
-  // ✅ NEW : modal paiement CB
-  const [payOpen, setPayOpen] = useState(false);
-  const [checkout, setCheckout] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -30,7 +27,6 @@ export default function UserInscriptions() {
       const list = Array.isArray(data) ? data : [];
       setItems(list);
 
-      // charge paiements (optionnel)
       const entries = await Promise.all(
         list.map(async (ins) => {
           try {
@@ -76,7 +72,6 @@ export default function UserInscriptions() {
     }
   };
 
-  // ✅ NEW : au clic “Payer” => on crée un checkout EN_ATTENTE puis on ouvre le modal carte
   const onPayer = async (id, statut) => {
     setMsg("");
     setError("");
@@ -92,13 +87,8 @@ export default function UserInscriptions() {
         return;
       }
 
-      // 🔥 crée le paiement EN_ATTENTE côté back et récupère paiementId + montant + titre
-      const co = await creerCheckout(id);
-
-      setCheckout(co);
-      setPayOpen(true);
-    } catch (e) {
-      setError(e?.response?.data?.message || "Erreur paiement (checkout)");
+      // ✅ redirection vers checkout Stripe
+      nav(`/user/paiement/${id}`);
     } finally {
       setPayingId(null);
     }
@@ -138,20 +128,6 @@ export default function UserInscriptions() {
 
   return (
     <div className="card">
-      {/* ✅ MODAL CB (test) */}
-      <PaymentModal
-        open={payOpen}
-        checkout={checkout}
-        onClose={() => {
-          setPayOpen(false);
-          setCheckout(null);
-        }}
-        onPaid={async () => {
-          setMsg("✅ Paiement validé !");
-          await load();
-        }}
-      />
-
       <h1>Mes inscriptions</h1>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
@@ -217,7 +193,7 @@ export default function UserInscriptions() {
                     onClick={() => onPayer(id, statut)}
                     disabled={isPayee || isAnnulee || payingId === id}
                   >
-                    {payingId === id ? "Paiement..." : isPayee ? "Déjà payé" : "Payer"}
+                    {payingId === id ? "Redirection..." : isPayee ? "Déjà payé" : "Payer"}
                   </button>
 
                   <button

@@ -72,6 +72,9 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
+                        // ✅ Stripe webhook : Stripe n’a pas ton JWT
+                        .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
+
                         // Auth publique
                         .requestMatchers("/api/auth/**").permitAll()
 
@@ -110,7 +113,6 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
 
-        // Origines autorisées (robuste)
         cfg.setAllowedOrigins(
                 Arrays.stream(allowedOrigins.split(","))
                         .map(String::trim)
@@ -118,18 +120,12 @@ public class SecurityConfig {
                         .toList()
         );
 
-        // Méthodes HTTP autorisées
         cfg.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         );
 
-        // Headers autorisés
         cfg.setAllowedHeaders(List.of("*"));
-
-        // Autorise cookies / Authorization header
         cfg.setAllowCredentials(true);
-
-        // Headers exposés au frontend
         cfg.setExposedHeaders(List.of("Content-Disposition"));
 
         UrlBasedCorsConfigurationSource source =

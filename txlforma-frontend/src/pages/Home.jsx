@@ -1,11 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./Home.css";
+import "./Home.css"; // ← Changez ici
 
 export default function Home() {
-  const navigate = useNavigate();
-
-  // ===== Reveal animations (pro, léger)
+  // ===== Reveal animations
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
     const io = new IntersectionObserver(
@@ -21,6 +18,36 @@ export default function Home() {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
+  }, []);
+
+  // ===== Floating animation for hero image
+  useEffect(() => {
+    const img = document.querySelector(".hero__img");
+    if (!img) return;
+    
+    let frame = 0;
+    const animate = () => {
+      frame += 0.01;
+      img.style.transform = `translateY(${Math.sin(frame) * 10}px)`;
+      requestAnimationFrame(animate);
+    };
+    const raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // ===== Parallax circles background
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const circles = document.querySelectorAll(".parallax-circle");
+      circles.forEach((circle, i) => {
+        const speed = (i + 1) * 0.02;
+        const x = (window.innerWidth - e.pageX * speed) / 100;
+        const y = (window.innerHeight - e.pageY * speed) / 100;
+        circle.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   // ===== Stats count animation
@@ -64,38 +91,40 @@ export default function Home() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // ===== Carousel “Toutes les formations”
+  // ===== Formations carousel
   const formations = useMemo(
     () => [
       {
         id: "front-end",
         title: "Développement Front-End",
-        text:
-          "Créer des interfaces modernes, rapides et responsive. Design propre + composants réutilisables.",
+        text: "Créer des interfaces modernes, rapides et responsive. Design propre + composants réutilisables.",
         btn: "Découvrir le Front-End",
-        route: "/formations/front-end",
         icon: "💻",
         tone: "tone-blue",
       },
       {
         id: "back-end",
         title: "Développement Back-End",
-        text:
-          "Construire des APIs sécurisées et scalables. Auth, base de données, architecture propre.",
+        text: "Construire des APIs sécurisées et scalables. Auth, base de données, architecture propre.",
         btn: "Découvrir le Back-End",
-        route: "/formations/back-end",
         icon: "🛠️",
         tone: "tone-teal",
       },
       {
         id: "cyber",
         title: "Cybersécurité",
-        text:
-          "Comprendre les attaques et protéger tes systèmes. OWASP, audits, bonnes pratiques.",
+        text: "Comprendre les attaques et protéger tes systèmes. OWASP, audits, bonnes pratiques.",
         btn: "Découvrir la Cybersécurité",
-        route: "/formations/cybersecurite",
         icon: "🔐",
         tone: "tone-cyan",
+      },
+      {
+        id: "devops",
+        title: "DevOps & Cloud",
+        text: "Automatisation, CI/CD, containers et orchestration. Déploiements modernes et scalables.",
+        btn: "Découvrir le DevOps",
+        icon: "☁️",
+        tone: "tone-purple",
       },
     ],
     []
@@ -137,14 +166,13 @@ export default function Home() {
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
-  // ===== Testimonials simple + propre
+  // ===== Testimonials
   const avis = [
     {
       id: 1,
-      title: "Les cours de front-end c’est incroyable",
-      author: "Lina",
-      text:
-        "Je progresse vite et les exercices sont bien expliqués. Ça donne envie d’aller au bout.",
+      title: "Les cours de front-end c'est incroyable",
+      author: "Lina M.",
+      text: "Je progresse vite et les exercices sont bien expliqués. Ça donne envie d'aller au bout.",
       img: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=1200",
       views: "251,232",
       stars: 5,
@@ -152,59 +180,93 @@ export default function Home() {
     {
       id: 2,
       title: "La plateforme est claire et moderne",
-      author: "Lina",
-      text:
-        "Le parcours est structuré, et j’adore voir ma progression. Très motivant.",
+      author: "Marc D.",
+      text: "Le parcours est structuré, et j'adore voir ma progression. Très motivant.",
       img: "https://images.pexels.com/photos/1181524/pexels-photo-1181524.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      views: "251,232",
+      views: "198,445",
       stars: 5,
     },
   ];
 
   return (
     <div className="home">
+      {/* Background decorative elements */}
+      <div className="parallax-circle circle-1" />
+      <div className="parallax-circle circle-2" />
+      <div className="parallax-circle circle-3" />
+
       {/* HERO */}
       <section className="hero">
         <div className="container hero__grid">
-          <div className="hero__left reveal">
+          <div className="hero__left reveal reveal-left">
+            <div className="hero__badge">
+              <span className="badge-dot" />
+              Plateforme de formation N°1
+            </div>
+            
             <h1 className="hero__title">
-              Découvrez les différentes <span>formations</span>
+              Découvrez les différentes <span className="gradient-text">formations</span>
             </h1>
+            
             <p className="hero__subtitle">
-              Une plateforme moderne pour apprendre, pratiquer et valider ses compétences avec un parcours clair.
+              Une plateforme moderne pour apprendre, pratiquer et valider ses compétences avec un parcours clair et structuré.
             </p>
 
             <div className="hero__actions">
-              <button className="btn btn-primary" onClick={() => scrollTo("formations")}>
-                Découvrir les formations
+              <button className="btn btn-primary btn-shine" onClick={() => scrollTo("formations")}>
+                <span>Découvrir les formations</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
-              <button className="btn btn-ghost" onClick={() => navigate("/register")}>
-                S’inscrire dès maintenant
+              <button className="btn btn-ghost">
+                S'inscrire gratuitement
               </button>
             </div>
 
             <div className="hero__mini">
               <div className="mini-pill">
-                <span className="mini-dot" />
+                <span className="mini-icon">✓</span>
                 Modules structurés
               </div>
               <div className="mini-pill">
-                <span className="mini-dot" />
+                <span className="mini-icon">✓</span>
                 Progression suivie
+              </div>
+              <div className="mini-pill">
+                <span className="mini-icon">✓</span>
+                Certificats reconnus
               </div>
             </div>
           </div>
 
-          <div className="hero__right reveal">
+          <div className="hero__right reveal reveal-right">
             <div className="hero__imageWrap">
-              {/* Mets ton image dans /public/hero-student.png */}
+              <div className="hero__glow" />
               <img
                 className="hero__img"
                 src="/etudiante.png"
-                alt="Étudiant"
+                alt="Étudiant en formation"
                 onError={(e) => (e.currentTarget.style.display = "none")}
               />
-              <span className="hero__circle" aria-hidden="true" />
+              <div className="hero__decoration deco-1">
+                <div className="deco-content">
+                  <span className="deco-icon">📚</span>
+                  <div>
+                    <div className="deco-title">+15k</div>
+                    <div className="deco-subtitle">Étudiants actifs</div>
+                  </div>
+                </div>
+              </div>
+              <div className="hero__decoration deco-2">
+                <div className="deco-content">
+                  <span className="deco-icon">🎯</span>
+                  <div>
+                    <div className="deco-title">75%</div>
+                    <div className="deco-subtitle">Taux de réussite</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -213,45 +275,54 @@ export default function Home() {
       {/* STATS */}
       <section className="stats reveal" ref={statsRef}>
         <div className="container">
-          <h2 className="sectionTitle center">Notre Success</h2>
-          <p className="sectionDesc center">
-            Une plateforme pensée pour apprendre efficacement, avec une expérience fluide et claire.
-          </p>
+          <div className="stats__header">
+            <h2 className="sectionTitle center">Nos résultats en chiffres</h2>
+            <p className="sectionDesc center">
+              Une plateforme pensée pour apprendre efficacement, avec une expérience fluide et des résultats concrets.
+            </p>
+          </div>
 
           <div className="stats__grid">
             <div className="stat">
+              <div className="stat__icon">👥</div>
               <div className="stat__num" data-count="15000" data-suffix="+">0</div>
-              <div className="stat__label">Students</div>
+              <div className="stat__label">Étudiants actifs</div>
             </div>
             <div className="stat">
+              <div className="stat__icon">🎓</div>
               <div className="stat__num" data-count="75" data-suffix="%">0</div>
-              <div className="stat__label">Total success</div>
+              <div className="stat__label">Taux de réussite</div>
             </div>
             <div className="stat">
+              <div className="stat__icon">📝</div>
               <div className="stat__num" data-count="35">0</div>
-              <div className="stat__label">Main questions</div>
+              <div className="stat__label">Modules de cours</div>
             </div>
             <div className="stat">
+              <div className="stat__icon">👨‍🏫</div>
               <div className="stat__num" data-count="26">0</div>
-              <div className="stat__label">Chief experts</div>
+              <div className="stat__label">Experts formateurs</div>
             </div>
             <div className="stat">
+              <div className="stat__icon">⭐</div>
               <div className="stat__num" data-count="16">0</div>
-              <div className="stat__label">Years of experience</div>
+              <div className="stat__label">Années d'expérience</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FORMATIONS (Carousel) */}
+      {/* FORMATIONS */}
       <section className="formations" id="formations">
         <div className="container reveal">
-          <h2 className="sectionTitle center">
-            Toutes les formations <span className="brand">TXLFORMA</span>.
-          </h2>
-          <p className="sectionDesc center">
-            Une sélection claire des domaines essentiels pour maîtriser le digital.
-          </p>
+          <div className="formations__header">
+            <h2 className="sectionTitle center">
+              Toutes les formations <span className="brand">TXLFORMA</span>
+            </h2>
+            <p className="sectionDesc center">
+              Une sélection claire des domaines essentiels pour maîtriser le digital et booster votre carrière.
+            </p>
+          </div>
 
           <div className="carousel">
             <button
@@ -260,17 +331,22 @@ export default function Home() {
               disabled={!canLeft}
               aria-label="Précédent"
             >
-              ‹
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
 
             <div className="carousel__track" ref={carRef}>
-              {formations.map((f) => (
-                <article key={f.id} className={`formation-card ${f.tone}`}>
+              {formations.map((f, idx) => (
+                <article key={f.id} className={`formation-card ${f.tone}`} style={{"--delay": `${idx * 0.1}s`}}>
                   <div className="formation-icon">{f.icon}</div>
                   <h3 className="formation-title">{f.title}</h3>
                   <p className="formation-text">{f.text}</p>
-                  <button className="btn btn-card" onClick={() => navigate(f.route)}>
-                    {f.btn}
+                  <button className="btn btn-card">
+                    <span>{f.btn}</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </button>
                 </article>
               ))}
@@ -282,7 +358,9 @@ export default function Home() {
               disabled={!canRight}
               aria-label="Suivant"
             >
-              ›
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -292,31 +370,54 @@ export default function Home() {
       <section className="avis">
         <div className="container reveal">
           <div className="avis__top">
-            <h2 className="sectionTitle">Ils nous font <span className="brandDark">confiance</span></h2>
-            <button className="linkBtn" onClick={() => scrollTo("formations")}>See all</button>
+            <div>
+              <h2 className="sectionTitle">
+                Ils nous font <span className="brandDark">confiance</span>
+              </h2>
+              <p className="avis__subtitle">Découvrez les témoignages de nos étudiants</p>
+            </div>
+            <button className="linkBtn" onClick={() => scrollTo("formations")}>
+              Voir tous les avis
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
 
           <div className="avis__grid">
-            {avis.map((a) => (
-              <article className="avisCard" key={a.id}>
+            {avis.map((a, idx) => (
+              <article className="avisCard" key={a.id} style={{"--delay": `${idx * 0.15}s`}}>
                 <div className="avisImg">
-                  <img src={a.img} alt={a.title} />
+                  <img src={a.img} alt={a.title} loading="lazy" />
+                  <div className="avisImg__overlay" />
                 </div>
 
-                <h3 className="avisTitle">{a.title}</h3>
+                <div className="avisCard__content">
+                  <h3 className="avisTitle">{a.title}</h3>
+                  <p className="avisText">{a.text}</p>
 
-                <div className="avisMeta">
-                  <div className="avatar">{a.author[0]}</div>
-                  <div>
-                    <div className="avisAuthor">{a.author}</div>
-                    <div className="avisSmall">Class, launched less than a year ago…</div>
+                  <div className="avisMeta">
+                    <div className="avatar">{a.author[0]}</div>
+                    <div>
+                      <div className="avisAuthor">{a.author}</div>
+                      <div className="avisSmall">Étudiant Front-End</div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="avisBottom">
-                  <button className="linkBtn small">Read more</button>
-                  <div className="stars">★★★★★</div>
-                  <div className="views">👁 {a.views}</div>
+                  <div className="avisBottom">
+                    <div className="stars">
+                      {Array.from({ length: a.stars }).map((_, i) => (
+                        <span key={i} className="star">★</span>
+                      ))}
+                    </div>
+                    <div className="views">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
+                      </svg>
+                      {a.views}
+                    </div>
+                  </div>
                 </div>
               </article>
             ))}
@@ -328,17 +429,23 @@ export default function Home() {
       <footer className="footer">
         <div className="container footer__grid">
           <div className="footer__brand">
-            <div className="footer__logo">TXL FORMA</div>
-            <div className="footer__sub">Gestion formation numérique</div>
+            <div className="footer__logo">
+              <span className="logo-icon">🎓</span>
+              TXL FORMA
+            </div>
+            <div className="footer__sub">Plateforme de formation numérique professionnelle</div>
           </div>
 
           <div className="footer__links">
-            <a href="#">Careers</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms & Conditions</a>
+            <a href="#" className="footer__link">Carrières</a>
+            <a href="#" className="footer__link">Politique de confidentialité</a>
+            <a href="#" className="footer__link">Conditions d'utilisation</a>
+            <a href="#" className="footer__link">Contact</a>
           </div>
 
-          <div className="footer__copy">© 2025 TXLFORMA Class Technologies Inc.</div>
+          <div className="footer__copy">
+            © 2025 TXLFORMA. Tous droits réservés.
+          </div>
         </div>
       </footer>
     </div>

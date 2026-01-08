@@ -2,7 +2,9 @@ package com.txlforma.sae501backend.repository;
 
 import com.txlforma.sae501backend.model.entity.Inscription;
 import com.txlforma.sae501backend.model.enums.StatutInscription;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,7 +19,7 @@ public interface InscriptionRepository extends JpaRepository<Inscription, Long> 
     // ✅ utilisé pour empêcher la suppression d'une session si inscriptions liées
     boolean existsBySession_Id(Long sessionId);
 
-    // ✅ MÉTHODE MANQUANTE (nécessaire au service)
+    // ✅ nécessaire au service
     List<Inscription> findBySession_Id(Long sessionId);
 
     long countBySession_IdAndStatutIn(Long sessionId, Collection<StatutInscription> statuts);
@@ -92,4 +94,14 @@ public interface InscriptionRepository extends JpaRepository<Inscription, Long> 
        where i.id = :id
    """)
     Optional<Inscription> findByIdFull(@Param("id") Long id);
+
+    // 🔒 AJOUT IMPORTANT : LOCK PESSIMISTE POUR LE CHECKOUT
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select i from Inscription i
+        join fetch i.session s
+        join fetch s.formation f
+        where i.id = :id
+    """)
+    Optional<Inscription> findByIdForUpdate(@Param("id") Long id);
 }

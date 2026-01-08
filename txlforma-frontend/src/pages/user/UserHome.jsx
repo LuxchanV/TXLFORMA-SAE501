@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { mesInscriptions, annulerInscription } from "../../services/inscriptions";
-import { simulerPaiement, paiementsParInscription } from "../../services/paiements";
+import { paiementsParInscription } from "../../services/paiements";
 import { evaluationParInscription } from "../../services/evaluations";
 import { telechargerAttestation } from "../../services/attestations";
 
@@ -20,6 +21,7 @@ function fmtDate(dateStr) {
 
 export default function UserHome() {
   const { user, refreshMe } = useAuth();
+  const nav = useNavigate();
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,6 +103,7 @@ export default function UserHome() {
     }
   };
 
+  // ✅ FIX: ne plus “simulerPaiement” ici => redirection checkout Stripe
   const onPayer = async (id, statut) => {
     setMsg("");
     setError("");
@@ -116,11 +119,8 @@ export default function UserHome() {
         return;
       }
 
-      const paiement = await simulerPaiement(id);
-      setMsg(`✅ Paiement OK (montant: ${paiement?.montant ?? "?"}€)`);
-      await load();
-    } catch (e) {
-      setError(e?.response?.data?.message || "Erreur paiement");
+      // ✅ redirection vers la page qui affiche la carte
+      nav(`/user/paiement/${id}`);
     } finally {
       setPayingId(null);
     }
@@ -285,7 +285,7 @@ export default function UserHome() {
                       onClick={() => onPayer(id, statut)}
                       disabled={isPayee || isAnnulee || payingId === id}
                     >
-                      {payingId === id ? "Paiement..." : isPayee ? "Déjà payé" : "Payer"}
+                      {payingId === id ? "Redirection..." : isPayee ? "Déjà payé" : "Payer"}
                     </button>
 
                     <button className="u-btn u-btn--ghost" onClick={() => togglePayments(id)}>
