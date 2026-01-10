@@ -223,3 +223,226 @@ Champs typiques attendus (exemples) :
 Créer une base :
 ```sql
 CREATE DATABASE txlforma2 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+5.3 Backend
+
+Dans txlforma-sae501-backend/ :
+
+Vérifier application.properties
+
+Lancer :
+
+mvn clean install
+mvn spring-boot:run
+
+
+Le backend démarre sur :
+
+http://localhost:8080
+
+5.4 Frontend
+
+Dans txlforma-sae501-frontend/ :
+
+npm install
+npm run dev
+
+
+Frontend :
+
+http://localhost:5173
+
+6. Configuration
+6.1 application.properties (backend)
+
+Exemple (à adapter) :
+
+server.port=8080
+
+spring.datasource.url=jdbc:mysql://localhost:3306/txlforma2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+app.jwt.secret=CHANGE_ME_very_long_secret_key_at_least_64_characters_1234567890
+app.jwt.expirationMinutes=240
+app.cors.allowedOrigins=http://localhost:5173,http://localhost:3000
+
+# Stripe
+stripe.secretKey=sk_test_xxx
+stripe.publicKey=pk_test_xxx
+stripe.currency=eur
+stripe.webhookSecret=whsec_xxx
+
+# Attestations / PDF
+app.storage.attestations-dir=uploads/attestations
+
+# Logo (ex: classpath)
+attestation.logoPath=classpath:static/txl-logo.png
+
+# Organisme
+attestation.organismeNom=TXL FORMA
+attestation.organismeAdresse=...
+attestation.organismeVille=...
+attestation.organismeEmail=contact@txlforma.fr
+attestation.organismeTelephone=...
+attestation.organismeSiret=...
+
+# Signature
+attestation.signataireNom=...
+attestation.signataireFonction=...
+
+# Template PDF optionnel (AcroForm)
+attestation.template.enabled=false
+attestation.template.path=classpath:templates/attestation-template.pdf
+
+
+⚠️ Les clés exactes dépendent de AttestationProperties. L’idée : aucune info n’est codée en dur dans le PDF, tout vient de la config.
+
+6.2 Variables d’environnement (frontend)
+
+Dans .env :
+
+VITE_API_URL=http://localhost:8080
+
+
+En prod (Vercel), configurer la variable VITE_API_URL vers l’URL du backend.
+
+7. Endpoints API importants
+7.1 Évaluations
+
+Créer une évaluation (formateur/admin)
+POST /api/formateur/evaluations
+Body :
+
+{
+  "inscriptionId": 123,
+  "note": 15.5,
+  "commentaire": "Bon travail."
+}
+
+
+✅ Déclenche auto-génération d’attestation si autorisé.
+
+Lire une évaluation (owner/admin/formateur session)
+GET /api/evaluations/inscription/{inscriptionId}
+
+7.2 Attestations
+Formateur
+
+Lister attestations d’une session
+GET /api/formateur/sessions/{sessionId}/attestations
+
+Upload PDF
+POST /api/formateur/attestations/upload (multipart/form-data)
+Fields :
+
+inscriptionId
+
+file (PDF)
+
+Générer PDF
+POST /api/formateur/attestations/{inscriptionId}/generate
+
+Télécharger PDF (formateur)
+GET /api/formateur/attestations/{inscriptionId}/download
+
+Utilisateur / Admin (download sécurisé)
+
+Télécharger (si autorisé)
+GET /api/attestations/inscription/{inscriptionId}
+
+7.3 Émargement
+
+Marquer présence
+POST /api/formateur/emargement
+Body :
+
+{
+  "inscriptionId": 123,
+  "dateJour": "2026-01-10",
+  "present": true
+}
+
+7.4 Heures (formateur)
+
+Heures session
+GET /api/formateur/sessions/{sessionId}/heures
+
+Déclarer heures
+POST /api/formateur/heures
+
+Total formateur
+GET /api/formateur/heures/total
+
+8. Déploiement (Vercel / production)
+
+Déployer le frontend sur Vercel
+
+Ajouter la variable :
+
+VITE_API_URL=https://<ton-backend-domain>
+
+Le backend doit être déployé séparément (Render, Railway, VPS, etc.)
+
+En prod, configurer :
+
+CORS (app.cors.allowedOrigins)
+
+Stripe keys (prod)
+
+DB (prod)
+
+JWT secret fort
+
+9. Dépannage (FAQ)
+“Column 'data' cannot be null”
+
+✅ Corrigé : ne plus save() une attestation avant d’avoir généré data.
+
+“cannot find symbol LineSeparator / Color”
+
+Solution :
+
+LineSeparator → com.lowagie.text.pdf.draw.LineSeparator
+
+Color → java.awt.Color
+
+Le bouton “Valider évaluation” échoue
+
+Vérifier :
+
+inscription en statut PAYÉE
+
+session non verrouillée
+
+token JWT valide (401 sinon)
+
+DB ok
+
+Le PDF n’affiche pas le logo
+
+vérifier attestation.logoPath
+
+vérifier que le fichier existe (ex: classpath:static/txl-logo.png)
+
+sinon fallback : affichage du nom organisme
+
+Auto-génération ne remplace pas un PDF uploadé
+
+✅ C’est voulu : MANUAL ne doit jamais être écrasé automatiquement.
+
+10. Qualité & bonnes pratiques
+
+Règles métier centralisées côté backend (impossible de contourner via UI)
+
+Sécurité : owner/admin/formateur session pour les accès sensibles
+
+PDF crédible et “officiel”
+
+Configurable via properties (organisme, logo, template)
+
+UI formateur claire (sessions / évaluations / attestations / heures)
+
+Aucun PDF “hardcodé” : le contenu vient des données + config
