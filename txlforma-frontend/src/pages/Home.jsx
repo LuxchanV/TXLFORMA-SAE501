@@ -1,7 +1,11 @@
+// src/pages/Home.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./Home.css"; // ← Changez ici
+import { useNavigate } from "react-router-dom";
+import "./Home.css";
 
 export default function Home() {
+  const navigate = useNavigate();
+
   // ===== Reveal animations
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
@@ -20,19 +24,22 @@ export default function Home() {
     return () => io.disconnect();
   }, []);
 
-  // ===== Floating animation for hero image
+  // ===== Floating animation for hero image (cleanup FIX)
   useEffect(() => {
     const img = document.querySelector(".hero__img");
     if (!img) return;
-    
+
     let frame = 0;
+    let rafId = 0;
+
     const animate = () => {
       frame += 0.01;
       img.style.transform = `translateY(${Math.sin(frame) * 10}px)`;
-      requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(animate);
     };
-    const raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
+
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   // ===== Parallax circles background
@@ -111,7 +118,7 @@ export default function Home() {
         tone: "tone-teal",
       },
       {
-        id: "cyber",
+        id: "cybersecurite",
         title: "Cybersécurité",
         text: "Comprendre les attaques et protéger tes systèmes. OWASP, audits, bonnes pratiques.",
         btn: "Découvrir la Cybersécurité",
@@ -121,7 +128,7 @@ export default function Home() {
       {
         id: "devops",
         title: "DevOps & Cloud",
-        text: "Automatisation, CI/CD, containers et orchestration. Déploiements modernes et scalables.",
+        text: "Automatisation, CI/CD, containers et déploiements modernes. Stack & bonnes pratiques.",
         btn: "Découvrir le DevOps",
         icon: "☁️",
         tone: "tone-purple",
@@ -162,7 +169,7 @@ export default function Home() {
     const el = carRef.current;
     if (!el) return;
     const card = el.querySelector(".formation-card");
-    const step = card ? card.getBoundingClientRect().width + 24 : 380;
+    const step = card ? card.getBoundingClientRect().width + 24 : 360;
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
@@ -203,11 +210,11 @@ export default function Home() {
               <span className="badge-dot" />
               Plateforme de formation N°1
             </div>
-            
+
             <h1 className="hero__title">
               Découvrez les différentes <span className="gradient-text">formations</span>
             </h1>
-            
+
             <p className="hero__subtitle">
               Une plateforme moderne pour apprendre, pratiquer et valider ses compétences avec un parcours clair et structuré.
             </p>
@@ -216,27 +223,23 @@ export default function Home() {
               <button className="btn btn-primary btn-shine" onClick={() => scrollTo("formations")}>
                 <span>Découvrir les formations</span>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <button className="btn btn-ghost">
-                S'inscrire gratuitement
+
+              <button className="btn btn-secondary" onClick={() => navigate("/register")} aria-label="S'inscrire dès maintenant">
+                <span>S&apos;inscrire dès maintenant</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 8H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M9.5 11L12.5 8L9.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
             </div>
 
             <div className="hero__mini">
-              <div className="mini-pill">
-                <span className="mini-icon">✓</span>
-                Modules structurés
-              </div>
-              <div className="mini-pill">
-                <span className="mini-icon">✓</span>
-                Progression suivie
-              </div>
-              <div className="mini-pill">
-                <span className="mini-icon">✓</span>
-                Certificats reconnus
-              </div>
+              <div className="mini-pill"><span className="mini-icon">✓</span>Modules structurés</div>
+              <div className="mini-pill"><span className="mini-icon">✓</span>Progression suivie</div>
+              <div className="mini-pill"><span className="mini-icon">✓</span>Certificats reconnus</div>
             </div>
           </div>
 
@@ -332,20 +335,25 @@ export default function Home() {
               aria-label="Précédent"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
             <div className="carousel__track" ref={carRef}>
               {formations.map((f, idx) => (
-                <article key={f.id} className={`formation-card ${f.tone}`} style={{"--delay": `${idx * 0.1}s`}}>
+                <article key={f.id} className={`formation-card ${f.tone}`} style={{ "--delay": `${idx * 0.1}s` }}>
                   <div className="formation-icon">{f.icon}</div>
                   <h3 className="formation-title">{f.title}</h3>
                   <p className="formation-text">{f.text}</p>
-                  <button className="btn btn-card">
+
+                  <button
+                    className="btn btn-card"
+                    onClick={() => navigate(`/formations/${f.id}`)}
+                    aria-label={f.btn}
+                  >
                     <span>{f.btn}</span>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </article>
@@ -359,7 +367,7 @@ export default function Home() {
               aria-label="Suivant"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -379,14 +387,14 @@ export default function Home() {
             <button className="linkBtn" onClick={() => scrollTo("formations")}>
               Voir tous les avis
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
 
           <div className="avis__grid">
             {avis.map((a, idx) => (
-              <article className="avisCard" key={a.id} style={{"--delay": `${idx * 0.15}s`}}>
+              <article className="avisCard" key={a.id} style={{ "--delay": `${idx * 0.15}s` }}>
                 <div className="avisImg">
                   <img src={a.img} alt={a.title} loading="lazy" />
                   <div className="avisImg__overlay" />
@@ -400,7 +408,7 @@ export default function Home() {
                     <div className="avatar">{a.author[0]}</div>
                     <div>
                       <div className="avisAuthor">{a.author}</div>
-                      <div className="avisSmall">Étudiant Front-End</div>
+                      <div className="avisSmall">Étudiant</div>
                     </div>
                   </div>
 
@@ -412,8 +420,14 @@ export default function Home() {
                     </div>
                     <div className="views">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
+                        <path
+                          d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
                       </svg>
                       {a.views}
                     </div>
@@ -424,30 +438,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="footer">
-        <div className="container footer__grid">
-          <div className="footer__brand">
-            <div className="footer__logo">
-              <span className="logo-icon">🎓</span>
-              TXL FORMA
-            </div>
-            <div className="footer__sub">Plateforme de formation numérique professionnelle</div>
-          </div>
-
-          <div className="footer__links">
-            <a href="#" className="footer__link">Carrières</a>
-            <a href="#" className="footer__link">Politique de confidentialité</a>
-            <a href="#" className="footer__link">Conditions d'utilisation</a>
-            <a href="#" className="footer__link">Contact</a>
-          </div>
-
-          <div className="footer__copy">
-            © 2025 TXLFORMA. Tous droits réservés.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

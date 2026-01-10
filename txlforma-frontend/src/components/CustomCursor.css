@@ -1,0 +1,142 @@
+/* src/components/CustomCursor.css */
+
+/* ✅ Affiche partout (tout le site) */
+html.txl-cursor-on,
+html.txl-cursor-on body,
+html.txl-cursor-on *{
+  cursor: none;
+}
+
+/* ✅ Sur les champs texte, on garde l’I-beam NATIF (sinon UX horrible) */
+html.txl-cursor-on input,
+html.txl-cursor-on textarea,
+html.txl-cursor-on select,
+html.txl-cursor-on [contenteditable="true"],
+html.txl-cursor-on [role="textbox"]{
+  cursor: text;
+}
+
+/* ===== POINTER ===== */
+.txlPointer{
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10000;
+  pointer-events: none;
+
+  /* transform est défini en JS */
+  transform: translate3d(-999px, -999px, 0);
+
+  /* hotspot sur la pointe */
+  margin-left: -10px;
+  margin-top: -10px;
+
+  transform-origin: 10px 10px;
+  will-change: transform;
+
+  filter: drop-shadow(0 14px 26px rgba(2,6,23,0.22));
+}
+
+.txlPointer__svg{
+  display: block;
+}
+
+.txlPointer__fill{
+  opacity: 1;
+  transition: opacity 120ms ease;
+}
+
+.txlPointer__outline{
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.txlPointer__detail{
+  opacity: 0.55;
+  transition: opacity 120ms ease;
+}
+
+/* Hover interactif : outline + un petit boost */
+html.txl-cursor-hover .txlPointer{
+  filter: drop-shadow(0 18px 30px rgba(37,99,235,0.22));
+}
+
+html.txl-cursor-hover .txlPointer__fill{
+  opacity: 0;
+}
+
+html.txl-cursor-hover .txlPointer__outline{
+  opacity: 1;
+}
+
+html.txl-cursor-hover .txlPointer__detail{
+  opacity: 0.85;
+}
+
+/* Click : micro “press” */
+html.txl-cursor-down .txlPointer{
+  transform: translate3d(var(--txl-x, -999px), var(--txl-y, -999px), 0) scale(0.96);
+}
+
+/* Si tu préfères pas de scale au click, dis-moi et je l’enlève */
+
+/* ===== HALO (cercle pointillé comme ta ref) ===== */
+.txlHalo{
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  pointer-events: none;
+
+  transform: translate3d(-999px, -999px, 0);
+  margin-left: -26px;
+  margin-top: -26px;
+
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+
+  opacity: 0;
+  transform-origin: 50% 50%;
+  will-change: transform;
+
+  /* Dotted ring propre */
+  border: 2px dotted rgba(124,58,237,0.75);
+
+  /* Glow léger */
+  box-shadow: 0 0 0 8px rgba(37,99,235,0.08);
+  filter: drop-shadow(0 10px 20px rgba(2,6,23,0.18));
+
+  transition: opacity 140ms ease, width 140ms ease, height 140ms ease, margin 140ms ease;
+}
+
+/* Animation de rotation légère */
+@keyframes txlSpin {
+  from { rotate: 0deg; }
+  to   { rotate: 360deg; }
+}
+
+/* Halo visible surtout en hover */
+html.txl-cursor-hover .txlHalo{
+  opacity: 1;
+  animation: txlSpin 1.1s linear infinite;
+
+  width: 58px;
+  height: 58px;
+  margin-left: -29px;
+  margin-top: -29px;
+}
+
+/* Sur zones texte : halo discret */
+html.txl-cursor-text .txlHalo{
+  opacity: 0.25;
+  animation: none;
+}
+
+/* Accessibilité */
+@media (prefers-reduced-motion: reduce){
+  html.txl-cursor-hover .txlHalo{ animation: none; }
+  .txlPointer__fill,
+  .txlPointer__outline,
+  .txlHalo{ transition: none; }
+}

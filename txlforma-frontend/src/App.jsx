@@ -1,8 +1,14 @@
 // src/App.jsx
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import "./styles/appFixes.css";
+
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
+
+import ThemeToggleFab from "./components/ThemeToggleFab.jsx";
+import CookieConsent from "./components/CookieConsent.jsx";
+import PublicFooter from "./components/PublicFooter.jsx";
 
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
@@ -22,9 +28,13 @@ import UserFormationDetails from "./pages/user/UserFormationDetails.jsx";
 import UserSessions from "./pages/user/UserSessions.jsx";
 import UserPaiements from "./pages/user/UserPaiements.jsx";
 import UserEvaluations from "./pages/user/UserEvaluations.jsx";
-
-// ✅ NEW
 import UserCheckout from "./pages/user/UserCheckout.jsx";
+
+// Legal pages
+import RGPD from "./pages/legal/RGPD.jsx";
+import ViePrivee from "./pages/legal/ViePrivee.jsx";
+import Confidentialite from "./pages/legal/Confidentialite.jsx";
+import MentionsLegales from "./pages/legal/MentionsLegales.jsx";
 
 function DashboardRedirect() {
   const { user, loadingUser } = useAuth();
@@ -50,23 +60,41 @@ export default function App() {
   const showNavbar = !isDashboard && !isAuth;
   const useContainer = !isDashboard && !isAuth && location.pathname !== "/";
 
+  const showPublicFooter = !isDashboard && !isAuth;
+  const showThemeToggle = !isDashboard; // public + auth
+
   return (
     <>
+      <ThemeToggleFab show={showThemeToggle} />
+
       {showNavbar && <Navbar />}
 
       <div className={useContainer ? "container" : ""}>
         <Routes>
+          {/* Public */}
           <Route path="/" element={<Home />} />
           <Route path="/catalogue" element={<Catalogue />} />
 
+          {/* ✅ Domaines */}
           <Route path="/formations/front-end" element={<DomainPage domain="front-end" />} />
           <Route path="/formations/back-end" element={<DomainPage domain="back-end" />} />
           <Route path="/formations/cybersecurite" element={<DomainPage domain="cybersecurite" />} />
+          <Route path="/formations/devops" element={<DomainPage domain="devops" />} />
+
+          {/* Détails formation (id) */}
           <Route path="/formations/:id" element={<FormationDetails />} />
 
+          {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          {/* Legal */}
+          <Route path="/rgpd" element={<RGPD />} />
+          <Route path="/vie-privee" element={<ViePrivee />} />
+          <Route path="/confidentialite" element={<Confidentialite />} />
+          <Route path="/mentions-legales" element={<MentionsLegales />} />
+
+          {/* Dashboard redirect */}
           <Route
             path="/dashboard"
             element={
@@ -76,6 +104,7 @@ export default function App() {
             }
           />
 
+          {/* USER */}
           <Route
             path="/user"
             element={
@@ -88,14 +117,12 @@ export default function App() {
             <Route path="catalogue" element={<UserCatalogue />} />
             <Route path="formations/:id" element={<UserFormationDetails />} />
             <Route path="sessions" element={<UserSessions />} />
-
-            {/* ✅ NEW */}
             <Route path="paiement/:inscriptionId" element={<UserCheckout />} />
-
             <Route path="paiements" element={<UserPaiements />} />
             <Route path="evaluations" element={<UserEvaluations />} />
           </Route>
 
+          {/* FORMATEUR */}
           <Route
             path="/formateur"
             element={
@@ -105,6 +132,7 @@ export default function App() {
             }
           />
 
+          {/* ADMIN */}
           <Route
             path="/admin"
             element={
@@ -114,9 +142,13 @@ export default function App() {
             }
           />
 
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+
+      {!isDashboard && <CookieConsent />}
+      {showPublicFooter && <PublicFooter />}
     </>
   );
 }

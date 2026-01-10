@@ -1,0 +1,48 @@
+/* src/styles/appFixes.css */
+
+/* ✅ Fix : empêche le template Vite de casser la mise en page */
+#root{
+  width: 100%;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: initial !important;
+  min-height: 100vh;
+}
+
+/* ========= THEME TOKENS (light/dark) ========= */
+:root{
+  --app-bg: #f6f9ff;
+  --app-surface: #ffffff;
+  --app-text: #0b1220;
+  --app-muted: #5b6579;
+  --app-border: rgba(15, 23, 42, 0.08);
+
+  --app-primary: #2563eb;
+  --app-primary-dark: #1e40af;
+  --app-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+
+  --app-shadow: 0 16px 40px rgba(2, 6, 23, 0.08);
+  --app-shadow-lg: 0 20px 52px rgba(2, 6, 23, 0.12);
+}
+
+html[data-theme="dark"]{
+  --app-bg: #0b1020;
+  --app-surface: rgba(17, 24, 39, 0.92);
+  --app-text: #e5e7eb;
+  --app-muted: #9aa4b2;
+  --app-border: rgba(255, 255, 255, 0.10);
+
+  --app-primary: #60a5fa;
+  --app-primary-dark: #3b82f6;
+  --app-gradient: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+
+  --app-shadow: 0 16px 44px rgba(0, 0, 0, 0.45);
+  --app-shadow-lg: 0 26px 70px rgba(0, 0, 0, 0.55);
+}
+
+body{
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
+}

@@ -43,14 +43,13 @@ export default function Navbar() {
       <div className="txl-nav__inner">
         {/* LEFT: BRAND */}
         <div className="txl-brand" onClick={() => navigate("/")}>
-          {/* Mets ton logo dans /public/logo.png */}
           <img
-            src="/logo.png"
+            src="/logoblanc.png"
             className="txl-brand__logo"
             alt="TXL FORMA"
+            decoding="async"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
-          <span className="txl-brand__name">TXL FORMA</span>
         </div>
 
         {/* MOBILE BURGER */}
@@ -65,7 +64,7 @@ export default function Navbar() {
           <span />
         </button>
 
-        {/* CENTER LINKS (✅ pas de Catalogue) */}
+        {/* CENTER LINKS */}
         <nav className={`txl-links ${open ? "txl-links--open" : ""}`}>
           <button className="txl-link" onClick={() => goHomeAndScroll("contact-section")}>
             Contact
@@ -80,10 +79,10 @@ export default function Navbar() {
           {!user ? (
             <>
               <button className="txl-btn txl-btn--ghost" onClick={() => navigate("/login")}>
-                Login
+                Se connecter
               </button>
               <button className="txl-btn txl-btn--primary" onClick={() => navigate("/register")}>
-                Sign Up
+                S'inscrire
               </button>
             </>
           ) : (
@@ -95,7 +94,7 @@ export default function Navbar() {
                 Dashboard
               </button>
               <button className="txl-btn txl-btn--danger" onClick={onLogout}>
-                Logout
+                Déconnexion
               </button>
             </>
           )}

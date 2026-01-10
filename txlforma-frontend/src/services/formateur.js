@@ -1,63 +1,82 @@
 import http from "../api/http";
 
-// -------- Sessions / Participants --------
+// -----------------------------
+// Sessions / participants
+// -----------------------------
 export async function mesSessionsFormateur() {
-  const { data } = await http.get("/api/formateur/sessions");
-  return data;
+  const res = await http.get("/api/formateur/sessions");
+  return res.data;
 }
 
 export async function participantsSession(sessionId) {
-  const { data } = await http.get(`/api/formateur/sessions/${sessionId}/participants`);
-  return data;
+  const res = await http.get(`/api/formateur/sessions/${sessionId}/participants`);
+  return res.data;
 }
 
-// -------- Émargement / Évaluations --------
-export async function marquerPresence({ inscriptionId, dateJour, present }) {
-  await http.post("/api/formateur/emargement", { inscriptionId, dateJour, present });
-  return true;
+// -----------------------------
+// Emargement
+// -----------------------------
+export async function marquerPresence(payload) {
+  // payload: { inscriptionId, dateJour, present }
+  const res = await http.post("/api/formateur/emargement", payload);
+  return res.data;
 }
 
-export async function enregistrerEvaluation({ inscriptionId, note, commentaire }) {
-  await http.post("/api/formateur/evaluations", { inscriptionId, note, commentaire });
-  return true;
+// -----------------------------
+// Evaluations
+// -----------------------------
+export async function enregistrerEvaluation(payload) {
+  // payload: { inscriptionId, note, commentaire }
+  const res = await http.post("/api/formateur/evaluations", payload);
+  return res.data;
 }
 
-// -------- Attestations --------
+// -----------------------------
+// Attestations
+// -----------------------------
 export async function listAttestations(sessionId) {
-  const { data } = await http.get(`/api/formateur/sessions/${sessionId}/attestations`);
-  return data;
+  const res = await http.get(`/api/formateur/sessions/${sessionId}/attestations`);
+  return res.data;
 }
 
 export async function uploadAttestation({ inscriptionId, file }) {
-  const form = new FormData();
-  form.append("inscriptionId", String(inscriptionId));
-  form.append("file", file);
+  const fd = new FormData();
+  fd.append("inscriptionId", inscriptionId);
+  fd.append("file", file);
 
-  const { data } = await http.post("/api/formateur/attestations/upload", form, {
+  const res = await http.post("/api/formateur/attestations/upload", fd, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return data;
+  return res.data;
+}
+
+export async function generateAttestation(inscriptionId) {
+  const res = await http.post(`/api/formateur/attestations/${inscriptionId}/generate`);
+  return res.data;
 }
 
 export async function downloadAttestation(inscriptionId) {
   const res = await http.get(`/api/formateur/attestations/${inscriptionId}/download`, {
     responseType: "blob",
   });
+  return res.data; // Blob PDF
+}
+
+// -----------------------------
+// Heures
+// -----------------------------
+export async function getHeuresSession(sessionId) {
+  const res = await http.get(`/api/formateur/sessions/${sessionId}/heures`);
   return res.data;
 }
 
-// -------- Heures réalisées --------
-export async function getHeuresSession(sessionId) {
-  const { data } = await http.get(`/api/formateur/sessions/${sessionId}/heures`);
-  return data;
-}
-
-export async function setHeuresSession({ sessionId, dateJour, heures }) {
-  await http.post("/api/formateur/heures", { sessionId, dateJour, heures });
-  return true;
+export async function setHeuresSession(payload) {
+  // payload: { sessionId, dateJour, heures }
+  const res = await http.post("/api/formateur/heures", payload);
+  return res.data;
 }
 
 export async function getTotalHeuresFormateur() {
-  const { data } = await http.get("/api/formateur/heures/total");
-  return data;
+  const res = await http.get("/api/formateur/heures/total");
+  return res.data;
 }

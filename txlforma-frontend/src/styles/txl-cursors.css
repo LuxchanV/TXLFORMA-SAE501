@@ -1,0 +1,56 @@
+/* src/styles/txl-cursors.css */
+
+/* ✅ Curseurs SVG */
+:root {
+  --txl-cursor-arrow: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2748%27%20height%3D%2748%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%23FFF%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.25%27%20d%3D%27M5.5%203.21V20.8c0%20.45.54.67.85.35l4.86-4.86a.5.5%200%200%201%20.35-.15h6.87a.5.5%200%200%200%20.35-.85L6.35%202.85a.5.5%200%200%200-.85.35Z%27/%3E%3C/svg%3E")
+    6 4,
+    auto;
+
+  --txl-cursor-hand: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2748%27%20height%3D%2748%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%23FFF%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.25%27%20stroke-linejoin%3D%27round%27%20d%3D%27M9%2011V5.75a1.25%201.25%200%200%201%202.5%200V11h.5V6.5a1.25%201.25%200%200%201%202.5%200V11h.5V7.25a1.25%201.25%200%200%201%202.5%200V13c0%204.25-2.25%207-6.5%207-3.75%200-5.25-2-5.25-4.5V13.5l-1.1-1.4a1.5%201.5%200%200%201%202.35-1.85L9%2011Z%27/%3E%3C/svg%3E")
+    12 3,
+    pointer;
+}
+
+/* ✅ IMPORTANT : si un ancien CSS met cursor:none, on écrase TOUT */
+html,
+body,
+body * {
+  cursor: var(--txl-cursor-arrow) !important;
+}
+
+/* ✅ Hover / clic : main */
+a,
+button,
+[role="button"],
+label,
+summary,
+[data-cursor="pointer"] {
+  cursor: var(--txl-cursor-hand) !important;
+}
+
+/* ✅ Texte : I-beam natif */
+input,
+textarea,
+select,
+[contenteditable="true"],
+[role="textbox"] {
+  cursor: text !important;
+}
+
+/* ✅ Disabled */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed !important;
+}
+
+/* ✅ Sur mobile/tablette : on laisse le comportement natif (pas besoin de curseur custom) */
+@media (pointer: coarse) {
+  html,
+  body,
+  body * {
+    cursor: auto !important;
+  }
+}

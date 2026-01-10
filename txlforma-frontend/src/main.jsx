@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 
 import "./styles/global.css"; // garde ton global (dashboard etc)
+import "./styles/txl-cursors.css"; // ✅ curseur custom partout
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -1,5 +1,6 @@
 package com.txlforma.sae501backend.model.entity;
 
+import com.txlforma.sae501backend.model.enums.AttestationSource;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,14 @@ public class Attestation {
 
     @Column(name = "uploaded_at", nullable = false)
     private LocalDateTime uploadedAt;
+
+    /**
+     * AUTO (généré) / MANUAL (upload).
+     * Nullable pour compat DB si la table existe déjà.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source", length = 20)
+    private AttestationSource source;
 
     @Lob
     @Column(nullable = false, columnDefinition = "LONGBLOB")

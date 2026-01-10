@@ -67,7 +67,7 @@ public class FormateurController {
     }
 
     // -----------------------------
-    // Émargement (bloqué si session fermée/annulée)
+    // Émargement
     // -----------------------------
     @PostMapping("/emargement")
     public ResponseEntity<Void> marquer(@Valid @RequestBody EmargementMarquerDto dto) {
@@ -85,7 +85,7 @@ public class FormateurController {
     }
 
     // -----------------------------
-    // Évaluations (option : bloqué si session fermée/annulée)
+    // Évaluations
     // -----------------------------
     @PostMapping("/evaluations")
     public ResponseEntity<Void> eval(@Valid @RequestBody EvaluationCreateDto dto) {
@@ -103,8 +103,7 @@ public class FormateurController {
     }
 
     // -----------------------------
-    // Attestations (Formateur)
-    // (les règles PAYÉE + session fermée sont déjà dans AttestationServiceImpl.upload)
+    // Attestations
     // -----------------------------
     @GetMapping("/sessions/{sessionId}/attestations")
     public List<AttestationMetaDto> listAttestations(@PathVariable Long sessionId) {
@@ -119,6 +118,12 @@ public class FormateurController {
     ) {
         String email = currentEmail();
         return attestationService.upload(inscriptionId, file, email);
+    }
+
+    @PostMapping("/attestations/{inscriptionId}/generate")
+    public AttestationMetaDto generateAttestation(@PathVariable Long inscriptionId) {
+        String email = currentEmail();
+        return attestationService.generate(inscriptionId, email);
     }
 
     @GetMapping("/attestations/{inscriptionId}/download")
@@ -139,7 +144,7 @@ public class FormateurController {
     }
 
     // -----------------------------
-    // Heures réalisées (Formateur)
+    // Heures réalisées
     // -----------------------------
     @GetMapping("/sessions/{sessionId}/heures")
     public HeuresSessionDto getHeures(@PathVariable Long sessionId) {

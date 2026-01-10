@@ -11,6 +11,7 @@ import com.txlforma.sae501backend.model.enums.Role;
 import com.txlforma.sae501backend.repository.EvaluationRepository;
 import com.txlforma.sae501backend.repository.InscriptionRepository;
 import com.txlforma.sae501backend.repository.UtilisateurRepository;
+import com.txlforma.sae501backend.service.AttestationService;
 import com.txlforma.sae501backend.service.EvaluationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,8 @@ public class EvaluationServiceImpl implements EvaluationService {
     private final InscriptionRepository inscriptionRepo;
     private final UtilisateurRepository utilisateurRepo;
 
+    private final AttestationService attestationService;
+
     @Override
     public Evaluation enregistrerEvaluation(Long inscriptionId, double note, String commentaire) {
         Utilisateur current = getCurrentUser();
@@ -40,6 +43,11 @@ public class EvaluationServiceImpl implements EvaluationService {
         // ✅ si FORMATEUR => doit être le formateur de la session
         ensureFormateurDeLaSessionOrAdmin(current, ins.getSession());
 
+        // ✅ règle projet : uniquement PAYÉE
+        if (!isInscriptionPayee(ins)) {
+            throw new ForbiddenException("Évaluation interdite : inscription non PAYÉE.");
+        }
+
         if (evaluationRepo.findByInscription_Id(inscriptionId).isPresent()) {
             throw new ConflictException("Évaluation déjà existante pour cette inscription");
         }
@@ -50,7 +58,12 @@ public class EvaluationServiceImpl implements EvaluationService {
                 .commentaire(commentaire)
                 .build();
 
-        return evaluationRepo.save(e);
+        Evaluation saved = evaluationRepo.save(e);
+
+        // ✅ auto génération (ne remplace pas un PDF uploadé)
+        attestationService.autoGenerateAfterEvaluationIfAllowed(inscriptionId, current.getEmail());
+
+        return saved;
     }
 
     @Override
@@ -105,5 +118,11 @@ public class EvaluationServiceImpl implements EvaluationService {
         }
         return utilisateurRepo.findByEmail(auth.getName())
                 .orElseThrow(() -> new NotFoundException("Utilisateur courant introuvable"));
+    }
+
+    private boolean isInscriptionPayee(Inscription ins) {
+        if (ins == null || ins.getStatut() == null) return false;
+        String st = ins.getStatut().name().toUpperCase();
+        return st.contains("PAYE");
     }
 }

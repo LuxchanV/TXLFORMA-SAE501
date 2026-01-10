@@ -11,6 +11,7 @@ import {
   listAttestations,
   uploadAttestation,
   downloadAttestation,
+  generateAttestation, // ✅ NEW
   getHeuresSession,
   setHeuresSession,
   getTotalHeuresFormateur,
@@ -131,6 +132,7 @@ export default function FormateurHome() {
   // Attestations
   const [attMap, setAttMap] = useState({});
   const [loadingAtt, setLoadingAtt] = useState(false);
+  const [loadingGen, setLoadingGen] = useState({}); // ✅ NEW
 
   // Heures
   const [heuresData, setHeuresData] = useState(null);
@@ -341,6 +343,7 @@ export default function FormateurHome() {
         commentaire: d.commentaire || null,
       });
       setMsg(`✅ Évaluation enregistrée — inscription #${inscriptionId}`);
+      // auto-génération côté backend, visible dans l’onglet attestations après refresh
     } catch (e) {
       setError(safeError(e, "Erreur évaluation"));
     } finally {
@@ -622,7 +625,7 @@ export default function FormateurHome() {
             ) : (
               <>
                 <div className="f-muted" style={{ marginBottom: 10 }}>
-                  Upload 1 PDF par apprenant (lié à l’inscription). Upload autorisé uniquement si PAYÉE.
+                  Choix formateur : générer automatiquement (PDF officiel) OU uploader un PDF existant.
                 </div>
 
                 <div className="f-tableWrap">
@@ -648,6 +651,7 @@ export default function FormateurHome() {
                           const pay = isPayee(p);
                           const meta = id ? attMap[id] : null;
                           const has = !!meta?.hasAttestation;
+                          const lg = !!loadingGen[id];
 
                           return (
                             <tr key={id}>
@@ -659,14 +663,33 @@ export default function FormateurHome() {
                                 {pay ? <Badge kind="success">PAYÉE</Badge> : <Badge kind="warn">NON PAYÉE</Badge>}
                               </td>
                               <td>
-                                {has ? (
-                                  <Badge kind="success">OK</Badge>
-                                ) : (
-                                  <Badge kind="neutral">Aucune</Badge>
-                                )}
+                                {has ? <Badge kind="success">OK</Badge> : <Badge kind="neutral">Aucune</Badge>}
                               </td>
                               <td>
                                 <div className="f-rowBtns">
+                                  {/* ✅ NEW: Générer */}
+                                  <button
+                                    className="f-btn"
+                                    disabled={!pay || !id || lg}
+                                    onClick={async () => {
+                                      try {
+                                        setMsg("");
+                                        setError("");
+                                        setLoadingGen((m) => ({ ...m, [id]: true }));
+                                        await generateAttestation(id);
+                                        setMsg(`✅ Attestation générée — inscription #${id}`);
+                                        await loadAttestations(selectedSessionId);
+                                      } catch (err) {
+                                        setError(safeError(err, "Génération impossible (évaluation requise ?)"));
+                                      } finally {
+                                        setLoadingGen((m) => ({ ...m, [id]: false }));
+                                      }
+                                    }}
+                                  >
+                                    {lg ? "..." : "Générer"}
+                                  </button>
+
+                                  {/* Upload */}
                                   <label
                                     className="f-btn ghost"
                                     style={{ cursor: pay ? "pointer" : "not-allowed", opacity: pay ? 1 : 0.6 }}
@@ -700,6 +723,7 @@ export default function FormateurHome() {
                                     />
                                   </label>
 
+                                  {/* Download */}
                                   <button
                                     className="f-btn"
                                     disabled={!has}
@@ -840,7 +864,9 @@ export default function FormateurHome() {
                           (heuresData.entries || []).map((e) => (
                             <tr key={e.dateJour}>
                               <td>{e.dateJour}</td>
-                              <td><b>{e.heures}h</b></td>
+                              <td>
+                                <b>{e.heures}h</b>
+                              </td>
                             </tr>
                           ))
                         )}

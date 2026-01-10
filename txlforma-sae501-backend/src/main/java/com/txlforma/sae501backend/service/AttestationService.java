@@ -8,11 +8,18 @@ import java.util.List;
 
 public interface AttestationService {
 
-    // ✅ pour ton AttestationController (/api/attestations/inscription/{id})
+    // USER download (Controller /api/attestations/inscription/{id})
     byte[] genererPdfPourInscription(Long inscriptionId);
 
-    // ✅ pour le formateur (upload/download + liste)
+    // Formateur: upload/download + liste
     AttestationMetaDto upload(Long inscriptionId, MultipartFile file, String currentEmail);
     Resource download(Long inscriptionId, String currentEmail);
     List<AttestationMetaDto> listBySession(Long sessionId, String currentEmail);
+
+    // ✅ bouton "Générer l'attestation" (formateur)
+    AttestationMetaDto generate(Long inscriptionId, String currentEmail);
+
+    // ✅ génération automatique après validation d’évaluation
+    // Ne remplace PAS une attestation MANUAL existante
+    void autoGenerateAfterEvaluationIfAllowed(Long inscriptionId, String currentEmail);
 }
