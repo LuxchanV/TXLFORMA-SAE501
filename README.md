@@ -5,6 +5,9 @@ https://www.swisstransfer.com/d/ea07649e-d87f-485d-9a5f-28afc9b5099b
 Nous n'avons pas eu le temps de le héberger à temps.
 Merci de votre compréhension
 
+Voici le lien Google doc (maquette, organisation 3d , modèle)
+
+https://docs.google.com/document/d/1LYjw50FqmC32_Ou5eARolTS4ZhFzk2F40uvc0t6-5b8/edit?usp=sharing
 
 # TXL FORMA — SAE501 (Plateforme de formation)
 Plateforme web de gestion de formations (catalogue, inscriptions, paiements, sessions, émargement, évaluations) avec un **système complet d’attestations PDF** (upload ou génération automatique/professionnelle).
