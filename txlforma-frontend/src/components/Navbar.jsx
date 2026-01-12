@@ -23,7 +23,9 @@ export default function Navbar() {
 
   const goHomeAndScroll = (id) => {
     const doScroll = () =>
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document
+        .getElementById(id)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     if (location.pathname !== "/") {
       navigate("/");
@@ -31,6 +33,12 @@ export default function Navbar() {
     } else {
       doScroll();
     }
+  };
+
+  // ✅ Ouvre la visite 3D dans un nouvel onglet
+  const goClasse3D = () => {
+    setOpen(false); // ferme le menu mobile si ouvert
+    window.open("https://txlforma-classe3d.vercel.app/", "_blank", "noopener,noreferrer");
   };
 
   const onLogout = () => {
@@ -66,10 +74,22 @@ export default function Navbar() {
 
         {/* CENTER LINKS */}
         <nav className={`txl-links ${open ? "txl-links--open" : ""}`}>
-          <button className="txl-link" onClick={() => goHomeAndScroll("contact-section")}>
+          {/* ✅ NOUVEL ONGLET */}
+          <button className="txl-link" onClick={goClasse3D}>
+            Visite de classe 3D
+          </button>
+
+          <button
+            className="txl-link"
+            onClick={() => goHomeAndScroll("contact-section")}
+          >
             Contact
           </button>
-          <button className="txl-link" onClick={() => goHomeAndScroll("about-section")}>
+
+          <button
+            className="txl-link"
+            onClick={() => goHomeAndScroll("about-section")}
+          >
             À propos
           </button>
         </nav>
@@ -78,10 +98,16 @@ export default function Navbar() {
         <div className="txl-actions">
           {!user ? (
             <>
-              <button className="txl-btn txl-btn--ghost" onClick={() => navigate("/login")}>
+              <button
+                className="txl-btn txl-btn--ghost"
+                onClick={() => navigate("/login")}
+              >
                 Se connecter
               </button>
-              <button className="txl-btn txl-btn--primary" onClick={() => navigate("/register")}>
+              <button
+                className="txl-btn txl-btn--primary"
+                onClick={() => navigate("/register")}
+              >
                 S'inscrire
               </button>
             </>
@@ -90,7 +116,10 @@ export default function Navbar() {
               <span className="txl-chip">
                 {user.prenom} — {user.role}
               </span>
-              <button className="txl-btn txl-btn--ghost" onClick={() => navigate("/dashboard")}>
+              <button
+                className="txl-btn txl-btn--ghost"
+                onClick={() => navigate("/dashboard")}
+              >
                 Dashboard
               </button>
               <button className="txl-btn txl-btn--danger" onClick={onLogout}>
