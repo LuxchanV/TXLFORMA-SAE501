@@ -1,3 +1,12 @@
+IMPORTANT: pour lancer le back end correctement
+mettre les clé secret et clé publique dans application.properties 
+- # Stripe (à mettre à chaque fois pour tester les paiement et lancer le backend)
+stripe.secretKey=sk_test_51SmDA0PSFymmWvL6eY1CesUwGtNsTAuLVEn0Ey4jJuyZ6bqb3r7VrwdvwGKsgAs9nz6a0tNakH9SkHuLIJyubp8i00KtK91oXf
+stripe.publicKey=pk_test_51SmDA0PSFymmWvL6ji5aUXtDWdODojL1F7ilrhfn66HDpdIsqll0DdyVPD85Pz1OUjPn53gJwmhtqVJ6kOGh7PRS00GIHYcET0
+stripe.currency=eur
+stripe.webhookSecret=${STRIPE_WEBHOOK_SECRET:}
+
+
 Voici le lien SwissTransfer pour la classe en 3D :
 
 https://www.swisstransfer.com/d/ea07649e-d87f-485d-9a5f-28afc9b5099b
