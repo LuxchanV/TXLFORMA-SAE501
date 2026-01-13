@@ -192,6 +192,7 @@ Exemple body :
 
 - Maquette & organisation : https://docs.google.com/document/d/1LYjw50FqmC32_Ou5eARolTS4ZhFzk2F40uvc0t6-5b8/edit?usp=sharing  
 - Classe 3D (hébergée) : https://txlforma-classe3d.vercel.app/
+- Classe 3D (non hébergée / plus d'objet et meilleur texture / plus réaliste ) : https://txlforma-classe3d.vercel.app/](https://www.swisstransfer.com/d/ea07649e-d87f-485d-9a5f-28afc9b5099b
 
 ---
 
