@@ -6,6 +6,27 @@ Plateforme web de gestion de formations : **catalogue**, **inscriptions**, **pai
 
 ---
 
+## Identifiants (DEV / test)
+
+> ⚠️ Comptes de test uniquement (à ne pas utiliser en production).
+
+### Admin
+- **Email** : `admin@txlforma.fr`  
+- **Mot de passe** : `Admin123!`
+
+### Formateur
+- **Email** : `Laroussi.Reda@gmail.com` — **MDP** : `Laroussi.Reda`  
+- **Email** : `dupont.leo@gmail.com` — **MDP** : `DupontLeo`  
+- **Email** : `formateur@txlforma.fr` — **MDP** : `Formateur123!`
+
+### User / Élève
+- **Email** : `Luxchan@gmail.com` — **MDP** : `Luxchan`  
+- **Email** : `Abeeschan@gmail.com` — **MDP** : `Abeeschan123`  
+- **Email** : `Enzo@gmail.com` — **MDP** : `Enzo.Antunes`  
+- **Email** : `Nicolas@gmail.com` — **MDP** : `Nicolas.Rannou`
+
+---
+
 ## Fonctionnalités
 
 - **Authentification & rôles** : USER / FORMATEUR / ADMIN (JWT)
@@ -74,9 +95,8 @@ Frontend : `http://localhost:5173`
 ## Configuration
 
 ### Backend — `application.properties`
-⚠️ **Ne committez jamais vos clés Stripe / JWT** (utiliser des valeurs locales + variables d’environnement).
-
-Exemple minimal (à adapter) :
+⚠️ **Important : pour lancer le backend correctement, renseigner les clés Stripe dans `application.properties`.**  
+Ne committez jamais vos clés Stripe/JWT : utilisez des valeurs locales + variables d’environnement.
 
 ```properties
 server.port=8080
@@ -117,18 +137,12 @@ attestation.template.enabled=false
 attestation.template.path=classpath:templates/attestation-template.pdf
 ```
 
-> **IMPORTANT (DEV)** : pour lancer le backend correctement, renseigner les clés Stripe dans `application.properties` (en local, sans commit).
-
----
-
 ### Frontend — `.env`
 Dans `txlforma-sae501-frontend/.env` :
 
 ```env
 VITE_API_URL=http://localhost:8080
 ```
-
-En production (ex: Vercel), configurer `VITE_API_URL` vers l’URL du backend.
 
 ---
 
@@ -176,7 +190,7 @@ Exemple body :
 
 ## Ressources (maquette / 3D)
 
-- Maquette & organisation : https://docs.google.com/document/d/1LYjw50FqmC32_Ou5eARolTS4ZhFzk2F40uvc0t6-5b8/edit?usp=sharing
+- Maquette & organisation : https://docs.google.com/document/d/1LYjw50FqmC32_Ou5eARolTS4ZhFzk2F40uvc0t6-5b8/edit?usp=sharing  
 - Classe 3D (non hébergée) : https://www.swisstransfer.com/d/ea07649e-d87f-485d-9a5f-28afc9b5099b
 
 ---
@@ -190,7 +204,7 @@ Exemple body :
 
 ## Dépannage rapide
 
-- **Paiements / backend ne démarre pas** → renseigner les clés Stripe dans `application.properties`
+- **Paiements / backend ne démarre pas** → vérifier les clés Stripe dans `application.properties`
 - **401 / actions refusées** → token JWT manquant/expiré
 - **Évaluation impossible** → inscription non payée ou session verrouillée
-- **Logo absent dans PDF** → vérifier `attestation.logoPath` et le fichier côté backend
+- **Logo absent dans PDF** → vérifier `attestation.logoPath` et la présence du fichier côté backend
